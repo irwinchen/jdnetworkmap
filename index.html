@@ -616,57 +616,25 @@
 
             console.log('Initializing map...');
 
-            // Define US boundaries (including Alaska and Hawaii)
-            const usBounds = L.latLngBounds(
-                [18.9110642, -179.1489], // Southwest corner (includes Aleutian Islands)
-                [71.538800, -66.9673]    // Northeast corner (includes northern Alaska)
-            );
-            
-            // Initialize the map with US-only restrictions
+            // Initialize the map
             const map = L.map('map', {
                 center: [39.8283, -98.5795], // Center of US
                 zoom: 4,
-                minZoom: 3,              // Prevent zooming too far out
-                maxZoom: 12,             // Reasonable max zoom for county detail
                 zoomControl: true,
                 scrollWheelZoom: true,
                 doubleClickZoom: true,
-                touchZoom: true,
-                maxBounds: usBounds,     // Restrict panning to US boundaries
-                maxBoundsViscosity: 1.0  // Make boundaries firm
+                touchZoom: true
             });
             
             // Store map reference globally for partner functionality
             window.partnerMap = map;
 
-            // Create a custom tile layer that only shows tiles within US bounds
-            const usTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            // Add tile layer with dark theme that includes city names
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
-                maxZoom: 12,
-                bounds: usBounds
-            });
-
-            // Override the createTile method to only load tiles within US bounds
-            const originalCreateTile = usTileLayer.createTile;
-            usTileLayer.createTile = function(coords, done) {
-                // Convert tile coordinates to lat/lng bounds
-                const tileBounds = this._tileCoordsToBounds(coords);
-                
-                // Check if tile intersects with US bounds
-                if (usBounds.intersects(tileBounds)) {
-                    return originalCreateTile.call(this, coords, done);
-                } else {
-                    // Return empty/transparent tile for areas outside US
-                    const tile = document.createElement('div');
-                    tile.style.width = this.options.tileSize + 'px';
-                    tile.style.height = this.options.tileSize + 'px';
-                    tile.style.backgroundColor = '#373737'; // Match app background
-                    return tile;
-                }
-            };
-            
-            usTileLayer.addTo(map);
+                maxZoom: 19
+            }).addTo(map);
 
             // Sample county data (in a real application, this would come from your Airtable API)
             // TODO: Replace this with actual Airtable API call when data is ready
@@ -1416,7 +1384,7 @@
         
         // Create display popup for existing partners
         function createPartnerDisplayPopup(partner) {
-            // Type labels are now the same as the values since we're using Airtable's exact values
+            // Type labels mapping
             const typeLabels = {
                 "Connector": 'Connector',
                 "Information Hub": 'Information Hub',
@@ -1427,17 +1395,49 @@
                 "Other": 'Other'
             };
             
-            return `
-                <div class="county-info">
-                    <h3>${partner.name}</h3>
-                    <p><strong>Type:</strong> ${typeLabels[partner.type] || partner.type}</p>
-                    <p><strong>Location:</strong> ${partner.latitude.toFixed(4)}, ${partner.longitude.toFixed(4)}</p>
-                    <div style="margin-top: 10px;">
-                        <button onclick="editPartner('${partner.id}')" style="background: #143CFF; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer; font-size: 11px; border-radius: 3px;">Edit</button>
-                        <button onclick="deletePartner('${partner.id}')" style="background: #666; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 11px; border-radius: 3px;">Delete</button>
-                    </div>
+            // Define all possible fields and their display labels (excluding coordinates)
+            const fieldMappings = {
+                'type': { label: 'Type', value: typeLabels[partner.type] || partner.type },
+                'address': { label: 'Address', value: partner.address },
+                'description': { label: 'Description', value: partner.description },
+                'contactPerson': { label: 'Contact Person', value: partner.contactPerson },
+                'contactEmail': { label: 'Contact Email', value: partner.contactEmail },
+                'contactPhone': { label: 'Contact Phone', value: partner.contactPhone },
+                'projectLink': { label: 'Project Tracking', value: partner.projectLink },
+                'notes': { label: 'Notes', value: partner.notes }
+            };
+            
+            // Build popup content dynamically for fields with values
+            let popupContent = `<div class="county-info"><h3>${partner.name}</h3>`;
+            
+            // Add each field that has a value
+            Object.entries(fieldMappings).forEach(([key, field]) => {
+                if (field.value && field.value.trim() !== '') {
+                    if (key === 'projectLink') {
+                        // Make project links clickable
+                        popupContent += `<p><strong>${field.label}:</strong> <a href="${field.value}" target="_blank" style="color: #FF0064;">${field.value}</a></p>`;
+                    } else if (key === 'contactEmail') {
+                        // Make emails clickable
+                        popupContent += `<p><strong>${field.label}:</strong> <a href="mailto:${field.value}" style="color: #FF0064;">${field.value}</a></p>`;
+                    } else if (key === 'description' || key === 'notes') {
+                        // Show longer text fields with word wrapping
+                        popupContent += `<p><strong>${field.label}:</strong><br><span style="font-size: 13px;">${field.value}</span></p>`;
+                    } else {
+                        // Standard field display
+                        popupContent += `<p><strong>${field.label}:</strong> ${field.value}</p>`;
+                    }
+                }
+            });
+            
+            // Add edit/delete buttons
+            popupContent += `
+                <div style="margin-top: 10px;">
+                    <button onclick="editPartner('${partner.id}')" style="background: #143CFF; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer; font-size: 11px; border-radius: 3px;">Edit</button>
+                    <button onclick="deletePartner('${partner.id}')" style="background: #666; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 11px; border-radius: 3px;">Delete</button>
                 </div>
-            `;
+            </div>`;
+            
+            return popupContent;
         }
         
         // Placeholder functions for edit/delete (Phase 2)
