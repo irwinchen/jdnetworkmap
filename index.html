@@ -639,13 +639,34 @@
             // Store map reference globally for partner functionality
             window.partnerMap = map;
 
-            // Add tile layer with dark theme focused on US territories
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            // Create a custom tile layer that only shows tiles within US bounds
+            const usTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
-                maxZoom: 12,  // Match map maxZoom
-                bounds: usBounds  // Optimize tile loading for US area
-            }).addTo(map);
+                maxZoom: 12,
+                bounds: usBounds
+            });
+
+            // Override the createTile method to only load tiles within US bounds
+            const originalCreateTile = usTileLayer.createTile;
+            usTileLayer.createTile = function(coords, done) {
+                // Convert tile coordinates to lat/lng bounds
+                const tileBounds = this._tileCoordsToBounds(coords);
+                
+                // Check if tile intersects with US bounds
+                if (usBounds.intersects(tileBounds)) {
+                    return originalCreateTile.call(this, coords, done);
+                } else {
+                    // Return empty/transparent tile for areas outside US
+                    const tile = document.createElement('div');
+                    tile.style.width = this.options.tileSize + 'px';
+                    tile.style.height = this.options.tileSize + 'px';
+                    tile.style.backgroundColor = '#373737'; // Match app background
+                    return tile;
+                }
+            };
+            
+            usTileLayer.addTo(map);
 
             // Sample county data (in a real application, this would come from your Airtable API)
             // TODO: Replace this with actual Airtable API call when data is ready
