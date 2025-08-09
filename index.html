@@ -616,24 +616,35 @@
 
             console.log('Initializing map...');
 
-            // Initialize the map
+            // Define US boundaries (including Alaska and Hawaii)
+            const usBounds = L.latLngBounds(
+                [18.9110642, -179.1489], // Southwest corner (includes Aleutian Islands)
+                [71.538800, -66.9673]    // Northeast corner (includes northern Alaska)
+            );
+            
+            // Initialize the map with US-only restrictions
             const map = L.map('map', {
                 center: [39.8283, -98.5795], // Center of US
                 zoom: 4,
+                minZoom: 3,              // Prevent zooming too far out
+                maxZoom: 12,             // Reasonable max zoom for county detail
                 zoomControl: true,
                 scrollWheelZoom: true,
                 doubleClickZoom: true,
-                touchZoom: true
+                touchZoom: true,
+                maxBounds: usBounds,     // Restrict panning to US boundaries
+                maxBoundsViscosity: 1.0  // Make boundaries firm
             });
             
             // Store map reference globally for partner functionality
             window.partnerMap = map;
 
-            // Add tile layer with dark theme that includes city names
+            // Add tile layer with dark theme focused on US territories
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
-                maxZoom: 19
+                maxZoom: 12,  // Match map maxZoom
+                bounds: usBounds  // Optimize tile loading for US area
             }).addTo(map);
 
             // Sample county data (in a real application, this would come from your Airtable API)
