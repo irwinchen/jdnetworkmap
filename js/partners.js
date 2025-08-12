@@ -425,21 +425,32 @@ class PartnerManager {
             civic: 'Civic Organization',
             college: 'Community College',
             funder: 'Funder',
-            general: 'General Partner'
+            general: 'General Partner',
+            "Connector": 'Connector',
+            "Information Hub": 'Information Hub',
+            "Funder": 'Funder',
+            "News Organization": 'News Organization',
+            "Community College": 'Community College',
+            "Library": 'Library',
+            "Other": 'Other'
         };
         
-        return `
-            <div class="county-info">
+        let content = `<div class="county-info">
                 <h3>${partner.name}</h3>
-                <p><strong>Type:</strong> ${typeLabels[partner.type] || partner.type}</p>
-                <p><strong>Location:</strong> ${partner.latitude.toFixed(4)}, ${partner.longitude.toFixed(4)}</p>
-                <p><strong>Added:</strong> ${new Date(partner.createdAt).toLocaleDateString()}</p>
-                <div style="margin-top: 10px;">
+                <p>${typeLabels[partner.type] || partner.type}</p>`;
+        
+        // Add description if it exists and has content
+        if (partner.description && partner.description.trim()) {
+            content += `<p>${partner.description}</p>`;
+        }
+        
+        content += `<div style="margin-top: 10px;">
                     <button onclick="partnerManager.editPartner('${partner.id}')" style="background: #143CFF; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer; font-size: 11px;">Edit</button>
                     <button onclick="partnerManager.deletePartner('${partner.id}')" style="background: #666; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 11px;">Delete</button>
                 </div>
-            </div>
-        `;
+            </div>`;
+        
+        return content;
     }
     
     /**
