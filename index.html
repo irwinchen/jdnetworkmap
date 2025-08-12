@@ -866,45 +866,7 @@
             // Load existing partners from Airtable
             loadExistingPartners();
             
-            // Add test markers to verify clustering (temporary)
-            addTestMarkersForClustering();
-            
             console.log('Map initialization complete');
-        }
-        
-        // Add test markers for clustering verification (temporary)
-        function addTestMarkersForClustering() {
-            console.log('Adding test markers for clustering verification...');
-            
-            const testPartners = [
-                // California cluster
-                { id: 'test1', name: 'Partner 1', type: 'Connector', latitude: 37.7749, longitude: -122.4194 },
-                { id: 'test2', name: 'Partner 2', type: 'Funder', latitude: 37.7849, longitude: -122.4094 },
-                { id: 'test3', name: 'Partner 3', type: 'Community College', latitude: 37.7649, longitude: -122.4294 },
-                { id: 'test4', name: 'Partner 4', type: 'News Organization', latitude: 37.7549, longitude: -122.4394 },
-                
-                // New York cluster
-                { id: 'test5', name: 'Partner 5', type: 'Connector', latitude: 40.7128, longitude: -74.0060 },
-                { id: 'test6', name: 'Partner 6', type: 'Library', latitude: 40.7228, longitude: -73.9960 },
-                { id: 'test7', name: 'Partner 7', type: 'Information Hub', latitude: 40.7028, longitude: -74.0160 },
-                
-                // Texas cluster
-                { id: 'test8', name: 'Partner 8', type: 'Funder', latitude: 29.7604, longitude: -95.3698 },
-                { id: 'test9', name: 'Partner 9', type: 'Community College', latitude: 29.7704, longitude: -95.3598 },
-                { id: 'test10', name: 'Partner 10', type: 'Other', latitude: 29.7504, longitude: -95.3798 },
-                
-                // Individual markers for contrast
-                { id: 'test11', name: 'Partner 11', type: 'Connector', latitude: 41.8781, longitude: -87.6298 }, // Chicago
-                { id: 'test12', name: 'Partner 12', type: 'Funder', latitude: 33.4484, longitude: -112.0740 } // Phoenix
-            ];
-            
-            testPartners.forEach(partner => {
-                if (window.partnerManager) {
-                    window.partnerManager.addPartnerMarker(partner);
-                }
-            });
-            
-            console.log(`Added ${testPartners.length} test markers for clustering verification`);
         }
         
         // Test Airtable authentication
