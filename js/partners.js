@@ -24,9 +24,50 @@ class PartnerManager {
      * Initialize marker clustering for better performance
      */
     initializeMarkerCluster() {
-        // This would use a clustering library like Leaflet.markercluster
-        // For now, we'll implement basic marker management
-        this.markerCluster = L.layerGroup().addTo(this.map);
+        // Configure marker clustering with custom options
+        this.markerCluster = L.markerClusterGroup({
+            // More aggressive clustering - larger radius for state-level clustering
+            maxClusterRadius: function(zoom) {
+                // At state level (zoom 1-6), use large radius for aggressive clustering
+                if (zoom <= 6) return 200;
+                // At regional level (zoom 7-9), medium clustering
+                if (zoom <= 9) return 100;
+                // At city level (zoom 10+), disable clustering
+                return 50;
+            },
+            // Disable clustering only at very high zoom (street level)
+            disableClusteringAtZoom: 12,
+            // Show coverage area on hover
+            showCoverageOnHover: true,
+            // Zoom to bounds when clicking a cluster
+            zoomToBoundsOnClick: true,
+            // Animate cluster creation and removal
+            animate: true,
+            // Remove clusters outside visible bounds for performance
+            removeOutsideVisibleBounds: true,
+            // Custom icon function for different cluster sizes
+            iconCreateFunction: function(cluster) {
+                var childCount = cluster.getChildCount();
+                var className = 'marker-cluster-';
+                
+                if (childCount < 10) {
+                    className += 'small';
+                } else if (childCount < 50) {
+                    className += 'medium';
+                } else {
+                    className += 'large';
+                }
+                
+                return new L.DivIcon({
+                    html: '<div><span>' + childCount + '</span></div>',
+                    className: 'marker-cluster ' + className,
+                    iconSize: new L.Point(40, 40)
+                });
+            }
+        });
+        
+        // Add cluster group to map
+        this.map.addLayer(this.markerCluster);
     }
     
     /**
@@ -207,37 +248,118 @@ class PartnerManager {
      */
     getMarkerStyle(type) {
         const styles = {
+            "Connector": {
+                // Pink circle for connectors
+                icon: this.createShapeIcon('#FF0064', 'circle')
+            },
+            "Information Hub": {
+                // Aqua diamond for information hubs
+                icon: this.createShapeIcon('#50F5C8', 'diamond')
+            },
+            "Funder": {
+                // Green diamond for funders
+                icon: this.createShapeIcon('#DCF500', 'diamond')
+            },
+            "News Organization": {
+                // Aqua diamond for news organizations
+                icon: this.createShapeIcon('#50F5C8', 'diamond')
+            },
+            "Community College": {
+                // Blue square for community colleges
+                icon: this.createShapeIcon('#143CFF', 'square')
+            },
+            "Library": {
+                // Pink circle for libraries
+                icon: this.createShapeIcon('#FF0064', 'circle')
+            },
+            "Other": {
+                // Pink triangle for other
+                icon: this.createShapeIcon('#FF0064', 'triangle')
+            },
+            // Legacy support for old type names
             civic: {
-                // Pink circle for civic organizations
-                icon: this.createCustomIcon('#FF0064', '●')
+                icon: this.createShapeIcon('#FF0064', 'circle')
             },
             college: {
-                // Blue square for community colleges
-                icon: this.createCustomIcon('#143CFF', '■')
+                icon: this.createShapeIcon('#143CFF', 'square')
             },
             funder: {
-                // Green diamond for funders
-                icon: this.createCustomIcon('#DCF500', '♦')
+                icon: this.createShapeIcon('#DCF500', 'diamond')
             },
             general: {
-                // Aqua triangle for general partners
-                icon: this.createCustomIcon('#50F5C8', '▲')
+                icon: this.createShapeIcon('#50F5C8', 'triangle')
             }
         };
         
-        return styles[type] || styles.general;
+        return styles[type] || styles["Other"];
     }
     
     /**
-     * Create custom icon for partner markers
+     * Create shape-based icon for partner markers
      */
-    createCustomIcon(color, symbol) {
+    createShapeIcon(color, shape) {
+        let shapeStyles = '';
+        let iconSize = [20, 20];
+        let iconAnchor = [10, 10];
+        
+        switch(shape) {
+            case 'circle':
+                shapeStyles = `
+                    background-color: ${color}; 
+                    width: 20px; 
+                    height: 20px; 
+                    border-radius: 50%; 
+                    border: 1px solid white;
+                    box-sizing: border-box;
+                `;
+                break;
+            case 'square':
+                shapeStyles = `
+                    background-color: ${color}; 
+                    width: 20px; 
+                    height: 20px; 
+                    border: 1px solid white;
+                    box-sizing: border-box;
+                `;
+                break;
+            case 'diamond':
+                shapeStyles = `
+                    background-color: ${color}; 
+                    width: 14px; 
+                    height: 14px; 
+                    border: 1px solid white;
+                    transform: rotate(45deg);
+                    box-sizing: border-box;
+                `;
+                break;
+            case 'triangle':
+                shapeStyles = `
+                    width: 0; 
+                    height: 0; 
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    border-bottom: 17px solid ${color};
+                    filter: drop-shadow(0 0 0 1px white);
+                `;
+                iconAnchor = [10, 17];
+                break;
+            default:
+                shapeStyles = `
+                    background-color: ${color}; 
+                    width: 20px; 
+                    height: 20px; 
+                    border-radius: 50%; 
+                    border: 1px solid white;
+                    box-sizing: border-box;
+                `;
+        }
+        
         return L.divIcon({
-            html: `<div style="background-color: ${color}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #373737; font-size: 12px; color: #373737; font-weight: bold;">${symbol}</div>`,
+            html: `<div style="${shapeStyles}"></div>`,
             className: 'partner-marker',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12],
-            popupAnchor: [0, -12]
+            iconSize: iconSize,
+            iconAnchor: iconAnchor,
+            popupAnchor: [0, -10]
         });
     }
     
