@@ -932,7 +932,13 @@
                     // Only create marker if partner has valid coordinates
                     if (partner.latitude && partner.longitude && 
                         !isNaN(partner.latitude) && !isNaN(partner.longitude)) {
-                        createPermanentPartnerMarker(partner);
+                        // Use partnerManager to add markers so they participate in clustering
+                        if (window.partnerManager) {
+                            window.partnerManager.addPartnerMarker(partner);
+                        } else {
+                            // Fallback to direct marker creation if partnerManager not available
+                            createPermanentPartnerMarker(partner);
+                        }
                     } else {
                         console.warn('Skipping partner with invalid coordinates:', partner.name, 
                             'Lat:', partner.latitude, 'Lng:', partner.longitude);
@@ -1356,8 +1362,12 @@
                 console.log('Partner saved to Airtable with ID:', partnerData.id);
                 showSaveProgress('✅ Partner saved successfully!', 'success');
                 
-                // Create permanent marker
-                createPermanentPartnerMarker(partnerData);
+                // Create permanent marker using partnerManager for clustering support
+                if (window.partnerManager) {
+                    window.partnerManager.addPartnerMarker(partnerData);
+                } else {
+                    createPermanentPartnerMarker(partnerData);
+                }
                 
                 // Close modal after a short delay to show success message
                 setTimeout(() => {
@@ -1367,8 +1377,12 @@
                 console.log('Partner saved locally only:', airtableResult.message);
                 showSaveProgress('❌ Failed to save to Airtable: ' + airtableResult.message, 'error');
                 
-                // Still create marker locally
-                createPermanentPartnerMarker(partnerData);
+                // Still create marker locally using partnerManager for clustering support
+                if (window.partnerManager) {
+                    window.partnerManager.addPartnerMarker(partnerData);
+                } else {
+                    createPermanentPartnerMarker(partnerData);
+                }
                 
                 // Don't auto-close on error, let user decide
             }
