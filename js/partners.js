@@ -9,6 +9,7 @@ class PartnerManager {
         this.partners = new Map(); // Store partners by ID
         this.markers = new Map(); // Store markers by partner ID
         this.markerCluster = null;
+        this.stateClusters = new Map(); // Store cluster groups by state
         this.currentFilter = {
             civicOrgs: true,
             communityColleges: true,
@@ -21,53 +22,97 @@ class PartnerManager {
     }
     
     /**
-     * Initialize marker clustering for better performance
+     * Initialize state-aware marker clustering
      */
     initializeMarkerCluster() {
-        // Configure marker clustering with custom options
-        this.markerCluster = L.markerClusterGroup({
-            // More aggressive clustering - larger radius for state-level clustering
-            maxClusterRadius: function(zoom) {
-                // At state level (zoom 1-6), use large radius for aggressive clustering
-                if (zoom <= 6) return 200;
-                // At regional level (zoom 7-9), medium clustering
-                if (zoom <= 9) return 100;
-                // At city level (zoom 10+), disable clustering
-                return 50;
-            },
-            // Disable clustering only at very high zoom (street level)
-            disableClusteringAtZoom: 12,
-            // Show coverage area on hover
-            showCoverageOnHover: true,
-            // Zoom to bounds when clicking a cluster
-            zoomToBoundsOnClick: true,
-            // Animate cluster creation and removal
-            animate: true,
-            // Remove clusters outside visible bounds for performance
-            removeOutsideVisibleBounds: true,
-            // Custom icon function for different cluster sizes
-            iconCreateFunction: function(cluster) {
-                var childCount = cluster.getChildCount();
-                var className = 'marker-cluster-';
-                
-                if (childCount < 10) {
-                    className += 'small';
-                } else if (childCount < 50) {
-                    className += 'medium';
-                } else {
-                    className += 'large';
+        // We'll create cluster groups dynamically per state
+        // This base cluster group is kept for backward compatibility but not used directly
+        this.markerCluster = L.layerGroup().addTo(this.map);
+    }
+    
+    /**
+     * Get or create a cluster group for a specific state
+     */
+    getStateClusterGroup(state) {
+        if (!this.stateClusters.has(state)) {
+            const clusterGroup = L.markerClusterGroup({
+                // More aggressive clustering within states
+                maxClusterRadius: function(zoom) {
+                    // At state level (zoom 1-6), use large radius for aggressive clustering
+                    if (zoom <= 6) return 200;
+                    // At regional level (zoom 7-9), medium clustering
+                    if (zoom <= 9) return 100;
+                    // At city level (zoom 10+), smaller clustering
+                    return 50;
+                },
+                // Disable clustering only at very high zoom (street level)
+                disableClusteringAtZoom: 12,
+                // Show coverage area on hover
+                showCoverageOnHover: true,
+                // Zoom to bounds when clicking a cluster
+                zoomToBoundsOnClick: true,
+                // Animate cluster creation and removal
+                animate: true,
+                // Remove clusters outside visible bounds for performance
+                removeOutsideVisibleBounds: true,
+                // Custom icon function with state info
+                iconCreateFunction: function(cluster) {
+                    var childCount = cluster.getChildCount();
+                    var className = 'marker-cluster-';
+                    
+                    if (childCount < 10) {
+                        className += 'small';
+                    } else if (childCount < 50) {
+                        className += 'medium';
+                    } else {
+                        className += 'large';
+                    }
+                    
+                    return new L.DivIcon({
+                        html: '<div><span>' + childCount + '</span></div>',
+                        className: 'marker-cluster ' + className,
+                        iconSize: new L.Point(40, 40)
+                    });
                 }
-                
-                return new L.DivIcon({
-                    html: '<div><span>' + childCount + '</span></div>',
-                    className: 'marker-cluster ' + className,
-                    iconSize: new L.Point(40, 40)
-                });
-            }
-        });
+            });
+            
+            this.stateClusters.set(state, clusterGroup);
+            this.map.addLayer(clusterGroup);
+        }
         
-        // Add cluster group to map
-        this.map.addLayer(this.markerCluster);
+        return this.stateClusters.get(state);
+    }
+    
+    /**
+     * Determine state from coordinates (simplified state detection)
+     */
+    getStateFromCoordinates(lat, lng) {
+        // Simplified state boundary detection using approximate coordinate ranges
+        // This is a basic implementation - for production, you'd use a proper geocoding service
+        const stateBoundaries = {
+            'CA': { minLat: 32.5, maxLat: 42.0, minLng: -124.5, maxLng: -114.1 },
+            'NY': { minLat: 40.5, maxLat: 45.0, minLng: -79.8, maxLng: -71.8 },
+            'TX': { minLat: 25.8, maxLat: 36.5, minLng: -106.6, maxLng: -93.5 },
+            'FL': { minLat: 24.4, maxLat: 31.0, minLng: -87.6, maxLng: -80.0 },
+            'IL': { minLat: 36.9, maxLat: 42.5, minLng: -91.5, maxLng: -87.0 },
+            'PA': { minLat: 39.7, maxLat: 42.3, minLng: -80.5, maxLng: -74.7 },
+            'OH': { minLat: 38.4, maxLat: 41.9, minLng: -84.8, maxLng: -80.5 },
+            'MI': { minLat: 41.7, maxLat: 48.3, minLng: -90.4, maxLng: -82.4 },
+            'GA': { minLat: 30.3, maxLat: 35.0, minLng: -85.6, maxLng: -80.8 },
+            'NC': { minLat: 33.8, maxLat: 36.6, minLng: -84.3, maxLng: -75.4 },
+            'WA': { minLat: 45.5, maxLat: 49.0, minLng: -124.8, maxLng: -116.9 }
+        };
+        
+        // Check each state boundary
+        for (const [state, bounds] of Object.entries(stateBoundaries)) {
+            if (lat >= bounds.minLat && lat <= bounds.maxLat && 
+                lng >= bounds.minLng && lng <= bounds.maxLng) {
+                return state;
+            }
+        }
+        
+        // Default to 'OTHER' if no state match found
+        return 'OTHER';
     }
     
     /**
@@ -209,17 +254,26 @@ class PartnerManager {
     }
     
     /**
-     * Add a permanent partner marker to the map
+     * Add a permanent partner marker to the map with state-aware clustering
      */
     addPartnerMarker(partner) {
         const marker = this.createPartnerMarker(partner);
+        
+        // Determine the state for this partner
+        const state = this.getStateFromCoordinates(partner.latitude, partner.longitude);
+        
+        // Store state information with the partner
+        partner.state = state;
         
         // Store references
         this.partners.set(partner.id, partner);
         this.markers.set(partner.id, marker);
         
-        // Add to cluster group
-        this.markerCluster.addLayer(marker);
+        // Add to state-specific cluster group
+        const stateClusterGroup = this.getStateClusterGroup(state);
+        stateClusterGroup.addLayer(marker);
+        
+        console.log(`Added partner "${partner.name}" to ${state} cluster group`);
         
         return marker;
     }
@@ -411,15 +465,17 @@ class PartnerManager {
     }
     
     /**
-     * Delete partner with confirmation
+     * Delete partner with confirmation (works with state-aware clustering)
      */
     deletePartner(partnerId) {
         const partner = this.partners.get(partnerId);
         if (partner && confirm(`Delete partner "${partner.name}"?`)) {
-            // Remove marker
+            // Remove marker from appropriate state cluster
             const marker = this.markers.get(partnerId);
             if (marker) {
-                this.markerCluster.removeLayer(marker);
+                const state = partner.state || this.getStateFromCoordinates(partner.latitude, partner.longitude);
+                const stateClusterGroup = this.getStateClusterGroup(state);
+                stateClusterGroup.removeLayer(marker);
                 this.markers.delete(partnerId);
             }
             
@@ -455,7 +511,7 @@ class PartnerManager {
     }
     
     /**
-     * Filter partners by type
+     * Filter partners by type (works with state-aware clustering)
      */
     filterPartners(filters) {
         this.currentFilter = { ...filters };
@@ -464,10 +520,13 @@ class PartnerManager {
             const partner = this.partners.get(partnerId);
             if (partner) {
                 const shouldShow = this.shouldShowPartner(partner);
+                const state = partner.state || this.getStateFromCoordinates(partner.latitude, partner.longitude);
+                const stateClusterGroup = this.getStateClusterGroup(state);
+                
                 if (shouldShow) {
-                    this.markerCluster.addLayer(marker);
+                    stateClusterGroup.addLayer(marker);
                 } else {
-                    this.markerCluster.removeLayer(marker);
+                    stateClusterGroup.removeLayer(marker);
                 }
             }
         });
