@@ -1,6 +1,16 @@
 /**
  * Partner Management System for J+D Partner Network Map
- * Handles partner data operations, marker creation, and UI interactions
+ * 
+ * Features:
+ * - State-aware marker clustering (only clusters within same state boundaries)
+ * - Geometric shape markers (circle, square, diamond, triangle) with white borders
+ * - Zoom-responsive clustering with different radius thresholds
+ * - Airtable integration for data persistence
+ * - Partner filtering by type
+ * - Simplified tooltips showing name, type, and description
+ * 
+ * @author J+D Development Team
+ * @version 2.0
  */
 
 class PartnerManager {

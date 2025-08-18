@@ -8,7 +8,9 @@ An interactive mapping application for visualizing and managing the Journalism +
 - **State-level overview** with US boundary visualization
 - **County-level detail** when zooming in (zoom level 7+)
 - **City names** displayed at state zoom level
-- **Custom marker styling** using J+D brand colors
+- **Custom geometric markers** (circles, squares, diamonds, triangles) with white borders
+- **State-aware marker clustering** that groups nearby partners within state boundaries
+- **Zoom-responsive clustering** with different radius thresholds
 - **Responsive design** for desktop and mobile devices
 
 ### 👥 Partner Management
@@ -20,14 +22,15 @@ An interactive mapping application for visualizing and managing the Journalism +
 - **Coordinate validation** and error handling
 
 ### 🎨 Partner Categories
-Partners are color-coded by type using J+D brand palette:
-- **Connector** - Pink (#FF0064)
-- **Information Hub** - Blue (#143CFF) 
-- **Funder** - Green (#DCF500)
-- **News Organization** - Aqua (#50F5C8)
-- **Community College** - Blue (#143CFF)
-- **Library** - Aqua (#50F5C8)
-- **Other** - Default styling
+Partners are color-coded by type using J+D brand palette with geometric shapes:
+- **Connector** - Pink (#FF0064) Circle
+- **Information Hub** - Aqua (#50F5C8) Diamond 
+- **Funder** - Green (#DCF500) Diamond
+- **News Organization** - Aqua (#50F5C8) Diamond
+- **Community College** - Blue (#143CFF) Square
+- **Library** - Pink (#FF0064) Circle
+- **Other** - Pink (#FF0064) Triangle
+- All markers feature **1px white borders** for visibility
 
 ### 💾 Data Integration
 - **Airtable backend** for partner data storage
@@ -146,6 +149,8 @@ const AIRTABLE_CONFIG = {
 - ✅ **Phase 3**: Airtable integration and CRUD operations
 - ✅ **Data Validation**: Coordinate validation and error handling
 - ✅ **User Feedback**: Real-time save progress indicators
+- ✅ **Marker Clustering**: State-aware clustering with geometric shapes
+- ✅ **Visual Improvements**: Shape-based markers with white borders
 - ⏳ **Phase 4**: Advanced filtering and search (planned)
 
 ### Current Features
@@ -157,14 +162,21 @@ const AIRTABLE_CONFIG = {
 - Real-time save feedback with progress indicators
 - Coordinate validation and cleanup
 - Auto-loading of existing partners
-- Custom partner type markers with J+D brand colors
+- State-aware marker clustering (only clusters within same state)
+- Geometric shape markers with white borders (circle, square, diamond, triangle)
+- Zoom-responsive clustering with different radius thresholds
+- Simplified partner tooltips showing name, type, and description
 
 ### Recent Updates
-- Fixed form field collection to include all partner data
-- Added comprehensive save progress feedback
-- Implemented coordinate validation for existing partners
-- Removed auto-zoom behavior on startup
-- Enhanced error handling and user messaging
+- **Marker Clustering**: Implemented state-aware clustering using Leaflet MarkerCluster plugin
+- **Geometric Markers**: Replaced circle markers with shape-based markers (circle, square, diamond, triangle)
+- **Visual Enhancements**: Added 1px white borders to all markers for better visibility
+- **Clustering Logic**: Only clusters markers within same state boundaries to maintain geographical coherence
+- **Zoom Responsiveness**: Different clustering radii based on zoom level (200px at state level, 100px regional, 50px city level)
+- **Simplified Tooltips**: Show only partner name, type, and description without field labels
+- **Form Improvements**: Fixed form field collection and added comprehensive save progress feedback
+- **Data Validation**: Implemented coordinate validation for existing partners
+- **User Experience**: Enhanced error handling and user messaging throughout
 
 ### Planned Enhancements
 - Partner filtering by type
