@@ -1,0 +1,15 @@
+{
+  "name": "jd-map-oauth-proxy",
+  "version": "1.0.0",
+  "description": "AWS Lambda function for OAuth2 token exchange proxy",
+  "main": "oauth-proxy.js",
+  "scripts": {
+    "deploy": "zip -r oauth-proxy.zip oauth-proxy.js && aws lambda update-function-code --function-name jd-map-oauth-proxy --zip-file fileb://oauth-proxy.zip"
+  },
+  "engines": {
+    "node": ">=18.x"
+  },
+  "keywords": ["oauth", "airtable", "lambda", "proxy"],
+  "author": "J+D Network Map",
+  "license": "MIT"
+}
