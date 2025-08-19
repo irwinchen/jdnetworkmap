@@ -1,0 +1,585 @@
+/* J+D Partner Network Map - Main Stylesheet */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Georgia", serif; /* Fallback for GT Sectra */
+  background-color: #373737;
+  color: #e1e1e1;
+  overflow: hidden;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(55, 55, 55, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 0, 100, 0.2);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 300;
+  color: #e1e1e1;
+  letter-spacing: 0.5px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 12px;
+  font-family: "Monaco", monospace; /* Fallback for GT Pressura Mono */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.data-info {
+  padding: 5px 10px;
+  background-color: rgba(255, 0, 100, 0.1);
+  border: 1px solid #ff0064;
+  border-radius: 2px;
+  color: #ff0064;
+}
+
+#map {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Custom Leaflet Styles */
+.leaflet-container {
+  background-color: #373737;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: rgba(55, 55, 55, 0.9) !important;
+  border: 1px solid #ff0064 !important;
+  color: #ff0064 !important;
+  font-weight: bold !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #ff0064 !important;
+  color: #373737 !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: rgba(55, 55, 55, 0.95) !important;
+  border: 1px solid #ff0064 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 4px 20px rgba(255, 0, 100, 0.3) !important;
+}
+
+.leaflet-popup-content {
+  color: #e1e1e1 !important;
+  font-family: "Monaco", monospace !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background-color: rgba(55, 55, 55, 0.95) !important;
+  border: 1px solid #ff0064 !important;
+}
+
+.county-info h3 {
+  color: #ff0064;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.county-info p {
+  margin-bottom: 4px;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff0064;
+  font-size: 18px;
+  z-index: 1000;
+}
+
+/* Add Partner Button Styles */
+.add-partner-btn {
+  padding: 8px 16px;
+  background-color: #ff0064;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(255, 0, 100, 0.3);
+  transition: all 0.3s ease;
+  font-family: "Monaco", monospace;
+  font-size: 11px;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.add-partner-btn:hover {
+  background-color: #e00559;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(255, 0, 100, 0.4);
+}
+
+.add-partner-btn.active {
+  background-color: #50f5c8;
+  color: #373737;
+}
+
+.add-partner-btn.active:hover {
+  background-color: #3dd4a8;
+}
+
+/* Mode indicator */
+.mode-indicator {
+  position: fixed;
+  top: 100px;
+  left: 20px;
+  z-index: 1000;
+  background-color: rgba(55, 55, 55, 0.9);
+  border: 1px solid #ff0064;
+  padding: 10px 15px;
+  border-radius: 3px;
+  font-family: "Monaco", monospace;
+  font-size: 12px;
+  color: #ff0064;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.mode-indicator.visible {
+  display: block;
+}
+
+/* Force crosshair cursor in add mode */
+#map.add-mode,
+#map.add-mode * {
+  cursor: crosshair !important;
+}
+
+/* Partner Form Modal */
+.partner-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(55, 55, 55, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.partner-modal.visible {
+  display: flex;
+}
+
+.partner-modal-content {
+  background-color: #373737;
+  border: 2px solid #ff0064;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(255, 0, 100, 0.3);
+}
+
+.partner-modal h2 {
+  color: #ff0064;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+  font-family: "Georgia", serif;
+}
+
+.partner-form-group {
+  margin-bottom: 20px;
+}
+
+.partner-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #e1e1e1;
+  font-family: "Monaco", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.partner-form-group input,
+.partner-form-group select,
+.partner-form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ff0064;
+  background: #2a2a2a;
+  color: #e1e1e1;
+  border-radius: 4px;
+  font-family: "Georgia", serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.partner-form-group input:focus,
+.partner-form-group select:focus,
+.partner-form-group textarea:focus {
+  outline: none;
+  border-color: #50f5c8;
+  box-shadow: 0 0 5px rgba(80, 245, 200, 0.3);
+}
+
+.partner-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.partner-form-coordinates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.partner-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.partner-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Monaco", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.partner-btn-primary {
+  background: #ff0064;
+  color: white;
+}
+
+.partner-btn-primary:hover {
+  background: #e00559;
+  transform: translateY(-1px);
+}
+
+.partner-btn-secondary {
+  background: #666;
+  color: white;
+}
+
+.partner-btn-secondary:hover {
+  background: #555;
+  transform: translateY(-1px);
+}
+
+/* Save Progress Indicator */
+.save-progress {
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.save-progress.hidden {
+  display: none;
+}
+
+.save-progress.info {
+  background: rgba(20, 60, 255, 0.1);
+  color: #143cff;
+  border: 1px solid rgba(20, 60, 255, 0.3);
+}
+
+.save-progress.success {
+  background: rgba(220, 245, 0, 0.1);
+  color: #dcf500;
+  border: 1px solid rgba(220, 245, 0, 0.3);
+}
+
+.save-progress.error {
+  background: rgba(255, 0, 100, 0.1);
+  color: #ff0064;
+  border: 1px solid rgba(255, 0, 100, 0.3);
+}
+
+.partner-btn-geocode {
+  background: #143cff;
+  color: white;
+  font-size: 11px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+.partner-btn-geocode:hover {
+  background: #0f2ecc;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #ff0064;
+  font-size: 24px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #e00559;
+  transform: scale(1.1);
+}
+
+.geocoding-status {
+  font-size: 11px;
+  margin-top: 5px;
+  font-family: "Monaco", monospace;
+}
+
+.geocoding-success {
+  color: #50f5c8;
+}
+
+.geocoding-error {
+  color: #ff6b35;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .controls {
+    font-size: 10px;
+  }
+
+  #map {
+    top: 70px;
+  }
+
+  .add-partner-btn {
+    font-size: 10px;
+    padding: 8px 15px;
+  }
+
+  .mode-indicator {
+    font-size: 10px;
+    padding: 8px 12px;
+  }
+}
+
+/* Custom Marker Cluster Styles */
+.marker-cluster-small {
+  background-color: rgba(255, 0, 100, 0.8) !important;
+  border: 2px solid #373737 !important;
+}
+.marker-cluster-small div {
+  background-color: rgba(255, 0, 100, 0.9) !important;
+  color: white !important;
+  font-family: "Monaco", monospace !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+}
+
+.marker-cluster-medium {
+  background-color: rgba(20, 60, 255, 0.8) !important;
+  border: 2px solid #373737 !important;
+}
+.marker-cluster-medium div {
+  background-color: rgba(20, 60, 255, 0.9) !important;
+  color: white !important;
+  font-family: "Monaco", monospace !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+}
+
+.marker-cluster-large {
+  background-color: rgba(220, 245, 0, 0.8) !important;
+  border: 2px solid #373737 !important;
+}
+.marker-cluster-large div {
+  background-color: rgba(220, 245, 0, 0.9) !important;
+  color: #373737 !important;
+  font-family: "Monaco", monospace !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+}
+
+/* Authentication Styles */
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(55, 55, 55, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-overlay.hidden {
+  display: none;
+}
+
+.auth-message {
+  background-color: #373737;
+  border: 2px solid #ff0064;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(255, 0, 100, 0.3);
+}
+
+.auth-message h2 {
+  color: #ff0064;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-family: "Georgia", serif;
+}
+
+.auth-message p {
+  color: #e1e1e1;
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.btn-auth {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Monaco", monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  background: #ff0064;
+  color: white;
+  font-weight: bold;
+}
+
+.btn-auth:hover {
+  background: #e00559;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 0, 100, 0.4);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-family: "Monaco", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.user-info.hidden {
+  display: none;
+}
+
+.user-name {
+  color: #50f5c8;
+  background-color: rgba(80, 245, 200, 0.1);
+  border: 1px solid #50f5c8;
+  padding: 5px 10px;
+  border-radius: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-logout {
+  padding: 5px 10px;
+  background-color: rgba(255, 0, 100, 0.1);
+  border: 1px solid #ff0064;
+  border-radius: 2px;
+  color: #ff0064;
+  cursor: pointer;
+  font-family: "Monaco", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: #ff0064;
+  color: white;
+}
