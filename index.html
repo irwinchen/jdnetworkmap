@@ -966,10 +966,14 @@
         console.log(
           "✅ OAuth callback received, exchanging code for tokens..."
         );
+        console.log("🔍 Code:", code?.substring(0, 20) + "...");
+        console.log("🔍 State:", state);
 
         try {
           // Exchange authorization code for tokens
+          console.log("🔄 Starting token exchange...");
           const tokenResponse = await exchangeCodeForTokens(code);
+          console.log("🔍 Token response:", tokenResponse ? "received" : "null");
 
           if (tokenResponse.access_token) {
             // Get user information
@@ -1027,6 +1031,18 @@
 
       async function exchangeCodeForTokens(code) {
         const codeVerifier = sessionStorage.getItem("oauth_code_verifier");
+        console.log("🔍 Code verifier found:", codeVerifier ? "yes" : "no");
+
+        const requestBody = new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: OAUTH_CONFIG.clientId,
+          redirect_uri: OAUTH_CONFIG.redirectUri,
+          code: code,
+          code_verifier: codeVerifier,
+        });
+
+        console.log("🔍 Token request body:", requestBody.toString());
+        console.log("🔍 Token endpoint:", `${OAUTH_CONFIG.airtableUrl}/oauth2/v1/token`);
 
         const response = await fetch(
           `${OAUTH_CONFIG.airtableUrl}/oauth2/v1/token`,
@@ -1035,24 +1051,30 @@
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: new URLSearchParams({
-              grant_type: "authorization_code",
-              client_id: OAUTH_CONFIG.clientId,
-              redirect_uri: OAUTH_CONFIG.redirectUri,
-              code: code,
-              code_verifier: codeVerifier,
-            }),
+            body: requestBody,
           }
         );
+        
+        console.log("🔍 Token response status:", response.status);
 
         if (!response.ok) {
-          const errorData = await response.json();
+          let errorData;
+          try {
+            errorData = await response.json();
+            console.error("🔍 Token exchange error data:", errorData);
+          } catch (e) {
+            const errorText = await response.text();
+            console.error("🔍 Token exchange error text:", errorText);
+            errorData = { error_description: errorText };
+          }
           throw new Error(
-            errorData.error_description || "Token exchange failed"
+            errorData.error_description || `Token exchange failed: ${response.status} ${response.statusText}`
           );
         }
 
-        return response.json();
+        const tokenData = await response.json();
+        console.log("🔍 Token exchange successful, access_token received:", tokenData.access_token ? "yes" : "no");
+        return tokenData;
       }
 
       async function getUserInfo(accessToken) {
