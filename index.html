@@ -484,6 +484,120 @@
             font-size: 12px !important;
             font-weight: bold !important;
         }
+        
+        /* Authentication Styles */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(55, 55, 55, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-overlay.hidden {
+            display: none;
+        }
+        
+        .auth-message {
+            background-color: #373737;
+            border: 2px solid #FF0064;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(255, 0, 100, 0.3);
+        }
+        
+        .auth-message h2 {
+            color: #FF0064;
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-family: 'Georgia', serif;
+        }
+        
+        .auth-message p {
+            color: #E1E1E1;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .btn-auth {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Monaco', monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            background: #FF0064;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn-auth:hover {
+            background: #e00559;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 0, 100, 0.4);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .user-info.hidden {
+            display: none;
+        }
+        
+        .user-email {
+            color: #50F5C8;
+            background-color: rgba(80, 245, 200, 0.1);
+            border: 1px solid #50F5C8;
+            padding: 5px 10px;
+            border-radius: 2px;
+        }
+        
+        .btn-logout {
+            padding: 5px 10px;
+            background-color: rgba(255, 0, 100, 0.1);
+            border: 1px solid #FF0064;
+            border-radius: 2px;
+            color: #FF0064;
+            cursor: pointer;
+            font-family: 'Monaco', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background-color: #FF0064;
+            color: white;
+        }
+        
+        .auth-loading {
+            color: #50F5C8;
+            font-family: 'Monaco', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
@@ -503,9 +617,29 @@
             <div class="title">J+D Partner Network</div>
         </div>
         <div class="controls">
+            <!-- User info (shown when authenticated) -->
+            <div id="user-info" class="user-info hidden">
+                <span class="user-email" id="user-email"></span>
+                <button id="logout-btn" class="btn-logout">Logout</button>
+            </div>
+            
+            <!-- Auth loading indicator -->
+            <div id="auth-loading" class="auth-loading hidden">
+                Authenticating...
+            </div>
         </div>
     </div>
     
+    <!-- Authentication Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-message">
+            <h2>Authentication Required</h2>
+            <p>Please login with your Airtable account to view and add partners to the J+D Network Map.</p>
+            <p>Only members of the J+D workspace can access this application.</p>
+            <button id="airtable-login-btn" class="btn-auth">Login with Airtable</button>
+        </div>
+    </div>
+
     <div id="loading" class="loading">Loading map data...</div>
     <div id="map"></div>
     
