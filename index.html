@@ -1007,7 +1007,7 @@
               authState.accessToken = tokenResponse.access_token;
               authState.refreshToken = tokenResponse.refresh_token;
               authState.userEmail = userInfo.email;
-              authState.userName = userInfo.name || userInfo.email; // Use name if available, fallback to email
+              authState.userName = userInfo.name || userInfo.displayName || userInfo.email; // Use name, then displayName, then email
               authState.userId = userInfo.id;
 
               // Store in localStorage for persistence
@@ -1017,7 +1017,7 @@
                 tokenResponse.refresh_token
               );
               localStorage.setItem("user_email", userInfo.email);
-              localStorage.setItem("user_name", userInfo.name || userInfo.email);
+              localStorage.setItem("user_name", userInfo.name || userInfo.displayName || userInfo.email);
               localStorage.setItem("user_id", userInfo.id);
 
               console.log("🎉 Authentication successful!");
@@ -1127,6 +1127,16 @@
             const userData = await response.json();
             console.log("✅ User info successfully retrieved:", userData);
             console.log("🔍 Available fields:", Object.keys(userData));
+            
+            // Create a display name from available data
+            if (userData.email && userData.email !== "authenticated_user@airtable.com") {
+              userData.displayName = userData.email.split('@')[0]; // Use email username part
+            } else if (userData.id && userData.id.startsWith('usr')) {
+              userData.displayName = `User ${userData.id.slice(-6)}`; // Use last 6 chars of user ID
+            } else {
+              userData.displayName = "Authenticated User";
+            }
+            
             return userData;
           } else {
             const errorText = await response.text();
@@ -1136,7 +1146,7 @@
             return {
               id: `user_${Date.now()}`, // Generate a temporary ID
               email: "authenticated_user@airtable.com", // Placeholder email
-              name: "Authenticated User"
+              displayName: "Authenticated User"
             };
           }
         } catch (error) {
@@ -1146,7 +1156,7 @@
           return {
             id: `user_${Date.now()}`, // Generate a temporary ID  
             email: "authenticated_user@airtable.com", // Placeholder email
-            name: "Authenticated User" // Add explicit name for fallback
+            displayName: "Authenticated User" // Add explicit displayName for fallback
           };
         }
       }
