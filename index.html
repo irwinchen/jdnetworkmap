@@ -1190,6 +1190,10 @@
         const userName = document.getElementById("user-name");
         const authLoading = document.getElementById("auth-loading");
 
+        // Always ensure auth loading is hidden when updating UI
+        authLoading.classList.add("hidden");
+        authState.isLoading = false;
+
         if (authState.isAuthenticated) {
           overlay.classList.add("hidden");
           userInfo.classList.remove("hidden");
@@ -1279,6 +1283,10 @@
 
       async function initializeApp() {
         console.log("🚀 Initializing J+D Partner Map...");
+
+        // Initialize auth loading state (ensure it's hidden by default)
+        authState.isLoading = false;
+        document.getElementById("auth-loading").classList.add("hidden");
 
         // Setup authentication event listeners
         setupAuthEventListeners();
