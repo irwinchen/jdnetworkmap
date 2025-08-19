@@ -598,13 +598,6 @@
         color: white;
       }
 
-      .auth-loading {
-        color: #50f5c8;
-        font-family: "Monaco", monospace;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
     </style>
   </head>
   <body>
@@ -657,10 +650,6 @@
           <button id="logout-btn" class="btn-logout">Logout</button>
         </div>
 
-        <!-- Auth loading indicator -->
-        <div id="auth-loading" class="auth-loading hidden">
-          Authenticating...
-        </div>
       </div>
     </div>
 
@@ -1021,9 +1010,6 @@
               localStorage.setItem("user_id", userInfo.id);
 
               console.log("🎉 Authentication successful!");
-              // Ensure auth loading is hidden
-              authState.isLoading = false;
-              document.getElementById("auth-loading").classList.add("hidden");
               updateAuthUI();
 
               // Clean up URL and session storage
@@ -1188,19 +1174,12 @@
         const overlay = document.getElementById("auth-overlay");
         const userInfo = document.getElementById("user-info");
         const userName = document.getElementById("user-name");
-        const authLoading = document.getElementById("auth-loading");
-
-        // Always ensure auth loading is hidden when updating UI
-        authLoading.classList.add("hidden");
-        authState.isLoading = false;
 
         if (authState.isAuthenticated) {
           overlay.classList.add("hidden");
           userInfo.classList.remove("hidden");
           // Display user's name or email if name not available
           userName.textContent = authState.userName || authState.userEmail || "Authenticated User";
-          authLoading.classList.add("hidden");
-          authState.isLoading = false; // Ensure loading state is cleared
 
           // Load partners now that user is authenticated
           console.log("Authentication complete - loading partners...");
@@ -1209,7 +1188,6 @@
         } else {
           overlay.classList.remove("hidden");
           userInfo.classList.add("hidden");
-          authLoading.classList.add("hidden");
         }
       }
 
@@ -1284,9 +1262,8 @@
       async function initializeApp() {
         console.log("🚀 Initializing J+D Partner Map...");
 
-        // Initialize auth loading state (ensure it's hidden by default)
+        // Initialize authentication state
         authState.isLoading = false;
-        document.getElementById("auth-loading").classList.add("hidden");
 
         // Setup authentication event listeners
         setupAuthEventListeners();
@@ -1317,15 +1294,8 @@
             }
 
             authState.isLoading = true;
-            document.getElementById("auth-loading").classList.remove("hidden");
-
-            try {
-              await initiateOAuth();
-            } finally {
-              // Always hide loading indicator when OAuth process completes
-              authState.isLoading = false;
-              document.getElementById("auth-loading").classList.add("hidden");
-            }
+            await initiateOAuth();
+            authState.isLoading = false;
           });
 
         // Logout button click handler
