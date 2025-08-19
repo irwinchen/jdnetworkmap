@@ -7,7 +7,10 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Origin': 'https://master.d3u92f9fdv7kxv.amplifyapp.com',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Content-Type': 'application/json',
     };
+
+    console.log('Received event:', JSON.stringify(event, null, 2));
 
     // Handle preflight OPTIONS request
     if (event.httpMethod === 'OPTIONS') {
@@ -75,12 +78,13 @@ exports.handler = async (event) => {
 
     } catch (error) {
         console.error('OAuth proxy error:', error);
+        console.error('Error stack:', error.stack);
         return {
             statusCode: 500,
             headers: corsHeaders,
             body: JSON.stringify({
                 error: 'server_error',
-                error_description: 'Internal server error'
+                error_description: 'Internal server error: ' + error.message
             }),
         };
     }
