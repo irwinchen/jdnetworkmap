@@ -991,6 +991,10 @@
           if (tokenResponse.access_token) {
             // Get user information
             const userInfo = await getUserInfo(tokenResponse.access_token);
+            console.log("🔍 User info retrieved:", userInfo);
+            console.log("🔍 User info fields available:", Object.keys(userInfo));
+            console.log("🔍 User name field:", userInfo.name || "not available");
+            console.log("🔍 User email field:", userInfo.email || "not available");
 
             // Verify workspace membership
             const isWorkspaceMember = await verifyWorkspaceMembership(
@@ -1124,10 +1128,12 @@
           }
         } catch (error) {
           console.log("User info fetch failed, using fallback:", error);
+          console.log("Error details:", error.message);
           // Fallback: create a user object with limited info
           return {
             id: `user_${Date.now()}`, // Generate a temporary ID  
             email: "authenticated_user@airtable.com", // Placeholder email
+            name: "Authenticated User" // Add explicit name for fallback
           };
         }
       }
@@ -1171,7 +1177,7 @@
           // Load partners now that user is authenticated
           console.log("Authentication complete - loading partners...");
           testAirtableAuth();
-          loadExistingPartners();
+          // Note: loadExistingPartners() will be called by map initialization
         } else {
           overlay.classList.remove("hidden");
           userInfo.classList.add("hidden");
@@ -1281,7 +1287,13 @@
             authState.isLoading = true;
             document.getElementById("auth-loading").classList.remove("hidden");
 
-            await initiateOAuth();
+            try {
+              await initiateOAuth();
+            } finally {
+              // Always hide loading indicator when OAuth process completes
+              authState.isLoading = false;
+              document.getElementById("auth-loading").classList.add("hidden");
+            }
           });
 
         // Logout button click handler
