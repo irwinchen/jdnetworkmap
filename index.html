@@ -661,7 +661,7 @@
           Please login with your Airtable account to view and add partners to
           the J+D Network Map.
         </p>
-        <p>Only members of the J+D workspace can access this application.</p>
+        <p><strong>Important:</strong> During authorization, make sure to select the <strong>"Partners"</strong> base to access this application.</p>
         <button id="airtable-login-btn" class="btn-auth">
           Login with Airtable
         </button>
@@ -858,6 +858,7 @@
         scope: "data.records:read data.records:write user.email:read",
         airtableUrl: "https://www.airtable.com",
         targetWorkspaceId: "wsp521eG1mYR4mexh",
+        requiredBaseId: "appwdh7OXsghNRy6k", // Partners base ID
         lambdaProxyUrl: "https://89ylgt7orf.execute-api.us-east-1.amazonaws.com/prod/oauth",
       };
       
@@ -985,12 +986,12 @@
             console.log("🔍 User name field:", userInfo.name || "not available");
             console.log("🔍 User email field:", userInfo.email || "not available");
 
-            // Verify workspace membership
-            const isWorkspaceMember = await verifyWorkspaceMembership(
+            // Verify access to required Partners base
+            const hasBaseAccess = await verifyBaseAccess(
               tokenResponse.access_token
             );
 
-            if (isWorkspaceMember) {
+            if (hasBaseAccess) {
               // Store authentication data
               authState.isAuthenticated = true;
               authState.accessToken = tokenResponse.access_token;
@@ -1019,9 +1020,9 @@
 
               return true;
             } else {
-              console.error("❌ User is not a member of the target workspace");
+              console.error("❌ User does not have access to the required Partners base");
               showAuthError(
-                "Access denied: You are not a member of the J+D workspace."
+                "Access denied: You must grant access to the Partners base to use this application. Please try authenticating again and make sure to select the 'Partners' base during authorization."
               );
               return false;
             }
@@ -1147,10 +1148,33 @@
         }
       }
 
-      async function verifyWorkspaceMembership(accessToken) {
-        // This is a placeholder - we'll implement workspace verification in Phase 3
-        console.log("📝 Workspace verification - to be implemented in Phase 3");
-        return true; // Temporary - accept all users for now
+      async function verifyBaseAccess(accessToken) {
+        console.log("🔍 Verifying access to required Partners base...");
+        try {
+          // Try to access the specific Partners base
+          const response = await fetch(
+            `https://api.airtable.com/v0/${OAUTH_CONFIG.requiredBaseId}/${AIRTABLE_CONFIG.tableName}?maxRecords=1`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+
+          if (response.ok) {
+            console.log("✅ User has access to required Partners base");
+            return true;
+          } else {
+            console.log("❌ User does not have access to required Partners base");
+            console.log("Response status:", response.status);
+            const errorText = await response.text();
+            console.log("Error details:", errorText);
+            return false;
+          }
+        } catch (error) {
+          console.log("❌ Error verifying base access:", error);
+          return false;
+        }
       }
 
       function showAuthError(message) {
