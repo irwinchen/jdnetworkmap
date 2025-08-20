@@ -850,20 +850,17 @@ class LayerManager {
             maxClusterRadius: config.clustering.maxRadius || 50,
             iconCreateFunction: function(cluster) {
                 const count = cluster.getChildCount();
-                let className = 'marker-cluster-small';
-                let size = 'small';
+                let sizeClass = 'small';
                 
                 if (count >= 100) {
-                    className = 'marker-cluster-large';
-                    size = 'large';
+                    sizeClass = 'large';
                 } else if (count >= 10) {
-                    className = 'marker-cluster-medium';
-                    size = 'medium';
+                    sizeClass = 'medium';
                 }
                 
                 return new L.DivIcon({
-                    html: `<div style="background-color: ${config.color};"><span>${count}</span></div>`,
-                    className: `marker-cluster ${className} layer-cluster-${config.id}`,
+                    html: `<div><span>${count}</span></div>`,
+                    className: `layer-cluster-${config.id} layer-cluster-${sizeClass}`,
                     iconSize: new L.Point(40, 40)
                 });
             },

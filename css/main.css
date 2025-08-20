@@ -601,49 +601,96 @@ body {
   font-weight: bold !important;
 }
 
-/* Layer-specific cluster styling */
+/* Layer-specific cluster styling - Community Colleges */
 .layer-cluster-community-colleges {
+  background-color: rgba(245, 158, 11, 0.8) !important;
   border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 .layer-cluster-community-colleges div {
   background-color: rgba(245, 158, 11, 0.9) !important;
   color: #ffffff !important;
   font-family: "GT Pressura Mono", Monaco, monospace !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: bold !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px !important;
 }
 
+/* Public Libraries */
 .layer-cluster-public-libraries {
+  background-color: rgba(139, 92, 246, 0.8) !important;
   border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 .layer-cluster-public-libraries div {
   background-color: rgba(139, 92, 246, 0.9) !important;
   color: #ffffff !important;
   font-family: "GT Pressura Mono", Monaco, monospace !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: bold !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px !important;
 }
 
+/* Civic Organizations */
 .layer-cluster-civic-organizations {
+  background-color: rgba(16, 185, 129, 0.8) !important;
   border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 .layer-cluster-civic-organizations div {
   background-color: rgba(16, 185, 129, 0.9) !important;
   color: #ffffff !important;
   font-family: "GT Pressura Mono", Monaco, monospace !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: bold !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px !important;
 }
 
+/* News Organizations */
 .layer-cluster-news-organizations {
+  background-color: rgba(239, 68, 68, 0.8) !important;
   border: 2px solid #ffffff !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
 }
 .layer-cluster-news-organizations div {
   background-color: rgba(239, 68, 68, 0.9) !important;
   color: #ffffff !important;
   font-family: "GT Pressura Mono", Monaco, monospace !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: bold !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px !important;
 }
 
 /* Layer marker styles - Remove problematic hover transform */
