@@ -85,6 +85,97 @@
       <span>Click on the map to add a partner</span>
     </div>
 
+    <!-- Layers Panel -->
+    <div id="layers-panel" class="layers-panel">
+      <div class="layers-header">
+        <h3>Layers</h3>
+        <button id="layers-toggle" class="layers-toggle" title="Toggle Layers Panel">
+          <span class="toggle-icon">◀</span>
+        </button>
+      </div>
+      <div class="layers-content">
+        <!-- J+D Partners Layer (always visible, non-toggleable) -->
+        <div class="layer-item layer-base" data-layer="jd-partners">
+          <div class="layer-info">
+            <div class="layer-color-indicator" style="background-color: #FF0064;"></div>
+            <div class="layer-details">
+              <span class="layer-name">J+D Partners</span>
+              <span class="layer-count" id="jd-partners-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <div class="visibility-indicator active" title="Always visible">👁</div>
+          </div>
+        </div>
+
+        <!-- Available Additional Layers -->
+        <div class="layer-item" data-layer="public-libraries">
+          <div class="layer-info">
+            <div class="layer-color-indicator" style="background-color: #8B5CF6;"></div>
+            <div class="layer-details">
+              <span class="layer-name">Public Libraries</span>
+              <span class="layer-count" id="public-libraries-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+              <span class="toggle-eye">👁</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="community-colleges">
+          <div class="layer-info">
+            <div class="layer-color-indicator" style="background-color: #F59E0B;"></div>
+            <div class="layer-details">
+              <span class="layer-name">Community Colleges</span>
+              <span class="layer-count" id="community-colleges-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+              <span class="toggle-eye">👁</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="civic-organizations">
+          <div class="layer-info">
+            <div class="layer-color-indicator" style="background-color: #10B981;"></div>
+            <div class="layer-details">
+              <span class="layer-name">Civic Organizations</span>
+              <span class="layer-count" id="civic-organizations-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+              <span class="toggle-eye">👁</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="news-organizations">
+          <div class="layer-info">
+            <div class="layer-color-indicator" style="background-color: #EF4444;"></div>
+            <div class="layer-details">
+              <span class="layer-name">News Organizations</span>
+              <span class="layer-count" id="news-organizations-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+              <span class="toggle-eye">👁</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Layer Limit Indicator -->
+        <div class="layer-limit-info">
+          <span id="active-layer-count">1</span> of 3 layers active
+        </div>
+      </div>
+    </div>
+
     <!-- Partner Form Modal -->
     <div id="partner-modal" class="modal">
       <div class="modal-content">
@@ -191,6 +282,9 @@
 
     <!-- Partner Management System -->
     <script src="js/partners.js"></script>
+    
+    <!-- Layer Management System -->
+    <script src="js/layerManager.js"></script>
 
     <!-- Core Application JavaScript -->
     <script src="js/config.js"></script>

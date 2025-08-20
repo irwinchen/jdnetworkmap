@@ -76,6 +76,9 @@ function initializeMap() {
   // Initialize partner marker cluster group
   initializeMarkerClusters();
 
+  // Initialize layer management system
+  initializeLayerManager();
+
   // Add partner controls and event listeners
   initializePartnerControls();
 
@@ -165,6 +168,32 @@ function initializeMarkerClusters() {
   // Add cluster group to map
   window.partnerMap.addLayer(window.partnerMarkers);
   console.log("Marker clustering initialized");
+}
+
+function initializeLayerManager() {
+  console.log("🎛️ Initializing Layer Management System...");
+  
+  // Create global layer manager instance
+  window.layerManager = new LayerManager(window.partnerMap);
+  
+  // Update partner count when partners are loaded
+  if (window.partnerMarkers) {
+    // Set initial count to 0
+    window.layerManager.updateJDPartnersCount(0);
+    
+    // Listen for marker additions/removals to update count
+    window.partnerMarkers.on('layeradd', function() {
+      const count = window.partnerMarkers.getLayers().length;
+      window.layerManager.updateJDPartnersCount(count);
+    });
+    
+    window.partnerMarkers.on('layerremove', function() {
+      const count = window.partnerMarkers.getLayers().length;
+      window.layerManager.updateJDPartnersCount(count);
+    });
+  }
+  
+  console.log("Layer management system initialized");
 }
 
 function initializePartnerControls() {
