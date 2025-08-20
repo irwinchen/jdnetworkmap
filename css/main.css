@@ -661,11 +661,7 @@ body {
 .toggle-icon {
   width: 16px;
   height: 16px;
-  transition: transform 0.3s ease;
-}
-
-.layers-panel.collapsed .toggle-icon {
-  transform: rotate(180deg);
+  transition: all 0.2s ease;
 }
 
 .layers-content {
@@ -763,6 +759,14 @@ body {
   transform: scale(1.1);
 }
 
+.layer-toggle:hover .toggle-eye.closed {
+  color: #999;
+}
+
+.layer-toggle:hover .toggle-eye.open {
+  color: #FF0064;
+}
+
 .layer-toggle.active {
   opacity: 1;
 }
@@ -771,20 +775,24 @@ body {
   width: 16px;
   height: 16px;
   transition: all 0.2s ease;
+  color: #999;
 }
 
 .toggle-eye.closed {
-  opacity: 0.4;
+  opacity: 0.6;
+  color: #666;
 }
 
 .toggle-eye.open {
   opacity: 1;
+  color: #FF0064;
 }
 
 .eye-icon {
   width: 16px;
   height: 16px;
-  color: #50F5C8;
+  color: #FF0064;
+  opacity: 1;
 }
 
 .layer-item.active .layer-toggle {

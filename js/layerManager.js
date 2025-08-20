@@ -125,13 +125,21 @@ class LayerManager {
     togglePanel() {
         const panel = document.getElementById('layers-panel');
         const toggleButton = panel.querySelector('#layers-toggle');
+        const toggleIcon = toggleButton.querySelector('.toggle-icon');
         
         panel.classList.toggle('collapsed');
         
         if (panel.classList.contains('collapsed')) {
             toggleButton.setAttribute('title', 'Show Layers Panel');
+            toggleIcon.setAttribute('data-lucide', 'chevron-right');
         } else {
             toggleButton.setAttribute('title', 'Hide Layers Panel');
+            toggleIcon.setAttribute('data-lucide', 'chevron-down');
+        }
+        
+        // Refresh Lucide icons after changing the icon
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     }
     
