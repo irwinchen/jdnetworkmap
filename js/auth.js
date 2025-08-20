@@ -297,12 +297,14 @@ async function verifyBaseAccess(accessToken) {
 function updateAuthUI() {
   const overlay = document.getElementById("auth-overlay");
   const userInfo = document.getElementById("user-info");
-  const userName = document.getElementById("user-name");
+  const userEmail = document.getElementById("user-email");
 
   if (authState.isAuthenticated) {
     overlay.classList.add("hidden");
-    userInfo.classList.remove("hidden");
-    userName.textContent = authState.userName || authState.userEmail || "Authenticated User";
+    userInfo.style.display = "flex"; // Show user info
+    if (userEmail) {
+      userEmail.textContent = authState.userName || authState.userEmail || "Authenticated User";
+    }
 
     // Load partners now that user is authenticated
     console.log("Authentication complete - loading partners...");
@@ -310,7 +312,7 @@ function updateAuthUI() {
     // Note: loadExistingPartners() will be called by map initialization
   } else {
     overlay.classList.remove("hidden");
-    userInfo.classList.add("hidden");
+    userInfo.style.display = "none"; // Hide user info
   }
 }
 
