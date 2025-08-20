@@ -115,11 +115,19 @@ function addStateBoundaries() {
           fillColor: "#ff0064",
         },
         onEachFeature: function (feature, layer) {
-          // Add state names to popups
+          // Add state names to popups (but disable in add mode)
           if (feature.properties.name) {
             layer.bindPopup(
               `<div class="county-info"><h3>${feature.properties.name}</h3></div>`
             );
+            
+            // Disable popup when in add partner mode
+            layer.on('click', function(e) {
+              if (appState.mapMode === "add") {
+                e.target.closePopup();
+                // Allow the event to bubble up to the map click handler
+              }
+            });
           }
         },
       });
