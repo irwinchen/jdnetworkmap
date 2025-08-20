@@ -1,5 +1,57 @@
 /* J+D Partner Network Map - Main Stylesheet */
 
+/* Custom Fonts */
+@font-face {
+  font-family: 'GT Sectra';
+  src: url('../fonts/gt-sectra-book-webfont.woff2') format('woff2'),
+       url('../fonts/gt-sectra-book-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GT Sectra';
+  src: url('../fonts/gt-sectra-bold-webfont.woff2') format('woff2'),
+       url('../fonts/gt-sectra-bold-webfont.woff') format('woff'),
+       url('../fonts/gt-sectra-bold-webfont.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GT Sectra';
+  src: url('../fonts/gt-sectra-book-italic-webfont.woff2') format('woff2'),
+       url('../fonts/gt-sectra-book-italic-webfont.woff') format('woff'),
+       url('../fonts/gt-sectra-book-italic-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'GT Sectra';
+  src: url('../fonts/gt-sectra-bold-italic-webfont.woff2') format('woff2'),
+       url('../fonts/gt-sectra-bold-italic-webfont.woff') format('woff');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'GT Pressura Mono';
+  src: url('../fonts/gt-pressura-mono-regular-webfont.woff2') format('woff2'),
+       url('../fonts/gt-pressura-mono-regular-webfont.woff') format('woff'),
+       url('../fonts/gt-pressura-mono-regular-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'GT Pressura Mono';
+  src: url('../fonts/gt-pressura-mono-bold-webfont.woff2') format('woff2'),
+       url('../fonts/gt-pressura-mono-bold-webfont.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,7 +59,7 @@
 }
 
 body {
-  font-family: "Georgia", serif; /* Fallback for GT Sectra */
+  font-family: "GT Sectra", Georgia, serif;
   background-color: #373737;
   color: #e1e1e1;
   overflow: hidden;
@@ -57,7 +109,7 @@ body {
   align-items: center;
   gap: 15px;
   font-size: 12px;
-  font-family: "Monaco", monospace; /* Fallback for GT Pressura Mono */
+  font-family: "GT Pressura Mono", Monaco, monospace;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -110,7 +162,7 @@ body {
 
 .leaflet-popup-content {
   color: #e1e1e1 !important;
-  font-family: "Monaco", monospace !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
   font-size: 12px !important;
   line-height: 1.4 !important;
 }
@@ -150,7 +202,7 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(255, 0, 100, 0.3);
   transition: all 0.3s ease;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 11px;
   color: white;
   text-transform: uppercase;
@@ -183,7 +235,7 @@ body {
   border: 1px solid #ff0064;
   padding: 10px 15px;
   border-radius: 3px;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 12px;
   color: #ff0064;
   text-transform: uppercase;
@@ -244,7 +296,7 @@ body {
   margin-bottom: 0;
   font-size: 24px;
   text-align: center;
-  font-family: "Georgia", serif;
+  font-family: "GT Sectra", Georgia, serif;
 }
 
 /* Form Groups and Rows */
@@ -272,7 +324,7 @@ body {
   margin-bottom: 8px;
   font-weight: bold;
   color: #e1e1e1;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -290,7 +342,7 @@ body {
   background: #2a2a2a;
   color: #e1e1e1;
   border-radius: 4px;
-  font-family: "Georgia", serif;
+  font-family: "GT Sectra", Georgia, serif;
   font-size: 14px;
   box-sizing: border-box;
 }
@@ -329,7 +381,7 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -402,7 +454,7 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -438,7 +490,7 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: all 0.3s ease;
@@ -472,7 +524,7 @@ body {
 .geocoding-status {
   font-size: 11px;
   margin-top: 5px;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
 }
 
 .geocoding-success {
@@ -520,7 +572,7 @@ body {
 .marker-cluster-small div {
   background-color: rgba(255, 0, 100, 0.9) !important;
   color: white !important;
-  font-family: "Monaco", monospace !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
   font-size: 12px !important;
   font-weight: bold !important;
 }
@@ -532,7 +584,7 @@ body {
 .marker-cluster-medium div {
   background-color: rgba(20, 60, 255, 0.9) !important;
   color: white !important;
-  font-family: "Monaco", monospace !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
   font-size: 12px !important;
   font-weight: bold !important;
 }
@@ -544,7 +596,7 @@ body {
 .marker-cluster-large div {
   background-color: rgba(220, 245, 0, 0.9) !important;
   color: #373737 !important;
-  font-family: "Monaco", monospace !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
   font-size: 12px !important;
   font-weight: bold !important;
 }
@@ -583,7 +635,7 @@ body {
   color: #ff0064;
   margin-bottom: 20px;
   font-size: 28px;
-  font-family: "Georgia", serif;
+  font-family: "GT Sectra", Georgia, serif;
 }
 
 .auth-message p {
@@ -598,7 +650,7 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -618,7 +670,7 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -646,7 +698,7 @@ body {
   border-radius: 2px;
   color: #ff0064;
   cursor: pointer;
-  font-family: "Monaco", monospace;
+  font-family: "GT Pressura Mono", Monaco, monospace;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
