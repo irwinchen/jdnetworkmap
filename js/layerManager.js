@@ -781,11 +781,13 @@ class LayerManager {
             }
         });
         
-        // Update active layer count
-        const activeCount = this.activeLayers.size;
+        // Update active layer count (J+D Partners + additional layers, max 2 total)
+        // J+D Partners is always active, so we count additional layers + 1
+        const additionalLayersActive = this.activeLayers.size - 1; // Subtract J+D base layer
+        const displayCount = 1 + additionalLayersActive; // J+D Partners + additional
         const countElement = document.getElementById('active-layer-count');
         if (countElement) {
-            countElement.textContent = activeCount;
+            countElement.textContent = displayCount;
         }
         
         // Update J+D partners count
