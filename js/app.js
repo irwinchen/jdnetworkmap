@@ -188,6 +188,8 @@ function initializeZoomIndicator() {
   console.log("🔍 Initializing zoom level indicator...");
   
   const zoomLevelElement = document.getElementById('zoom-level');
+  const zoomIndicator = document.getElementById('zoom-indicator');
+  let fadeTimeout = null;
   
   // Update zoom level display
   function updateZoomLevel() {
@@ -197,13 +199,55 @@ function initializeZoomIndicator() {
     }
   }
   
-  // Listen for zoom events
-  window.partnerMap.on('zoomend', updateZoomLevel);
+  // Show zoom indicator with fade in
+  function showZoomIndicator() {
+    if (zoomIndicator) {
+      zoomIndicator.classList.add('visible');
+    }
+  }
   
-  // Set initial zoom level
+  // Hide zoom indicator with fade out
+  function hideZoomIndicator() {
+    if (zoomIndicator) {
+      zoomIndicator.classList.remove('visible');
+    }
+  }
+  
+  // Handle zoom start (show indicator)
+  function onZoomStart() {
+    showZoomIndicator();
+    
+    // Clear any existing timeout
+    if (fadeTimeout) {
+      clearTimeout(fadeTimeout);
+      fadeTimeout = null;
+    }
+  }
+  
+  // Handle zoom end (update level and set fade timeout)
+  function onZoomEnd() {
+    updateZoomLevel();
+    
+    // Clear any existing timeout
+    if (fadeTimeout) {
+      clearTimeout(fadeTimeout);
+    }
+    
+    // Set timeout to hide after 2 seconds
+    fadeTimeout = setTimeout(() => {
+      hideZoomIndicator();
+      fadeTimeout = null;
+    }, 2000);
+  }
+  
+  // Listen for zoom events
+  window.partnerMap.on('zoomstart', onZoomStart);
+  window.partnerMap.on('zoomend', onZoomEnd);
+  
+  // Set initial zoom level (but don't show indicator)
   updateZoomLevel();
   
-  console.log("Zoom level indicator initialized");
+  console.log("Zoom level indicator initialized with fade behavior");
 }
 
 function initializeLayerManager() {
