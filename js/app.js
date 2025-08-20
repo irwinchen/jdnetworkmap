@@ -152,7 +152,7 @@ function initializeMarkerClusters() {
       } else if (zoom <= 9) {
         return 50; // Small radius for regional clustering (zoom 7-9)
       } else {
-        return 30; // Very small radius for city-level clustering (zoom 10+)
+        return 0; // No clustering at zoom 10+ (city level and beyond)
       }
     },
     // Custom icon creation
@@ -172,8 +172,8 @@ function initializeMarkerClusters() {
         iconSize: new L.Point(40, 40)
       });
     },
-    // Completely disable clustering at city level and above
-    disableClusteringAtZoom: 12, // Stop clustering when zoomed in to city level
+    // Completely disable clustering at zoom level 10 and above
+    disableClusteringAtZoom: 10, // Stop clustering at zoom 10+ (city level)
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
     zoomToBoundsOnClick: true

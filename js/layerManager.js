@@ -872,7 +872,15 @@ class LayerManager {
         console.log('🔗 Creating clustered layer for:', config.name);
         
         const clusterGroup = L.markerClusterGroup({
-            maxClusterRadius: config.clustering.maxRadius || 50,
+            maxClusterRadius: function(zoom) {
+                if (zoom <= 6) {
+                    return 0; // No clustering at US/continental level (zoom 4-6)
+                } else if (zoom <= 9) {
+                    return config.clustering.maxRadius || 50; // Normal clustering (zoom 7-9)
+                } else {
+                    return 0; // No clustering at zoom 10+ (city level and beyond)
+                }
+            },
             iconCreateFunction: function(cluster) {
                 const count = cluster.getChildCount();
                 let sizeClass = 'small';
@@ -889,6 +897,8 @@ class LayerManager {
                     iconSize: new L.Point(40, 40)
                 });
             },
+            // Completely disable clustering at zoom level 10 and above
+            disableClusteringAtZoom: 10,
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
             zoomToBoundsOnClick: true
