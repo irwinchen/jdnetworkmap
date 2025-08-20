@@ -87,6 +87,9 @@ function initializeMap() {
   // Initialize partner marker cluster group
   initializeMarkerClusters();
 
+  // Initialize zoom level indicator (temporary for clustering configuration)
+  initializeZoomIndicator();
+
   // Initialize layer management system
   initializeLayerManager();
 
@@ -179,6 +182,28 @@ function initializeMarkerClusters() {
   // Add cluster group to map
   window.partnerMap.addLayer(window.partnerMarkers);
   console.log("Marker clustering initialized");
+}
+
+function initializeZoomIndicator() {
+  console.log("🔍 Initializing zoom level indicator...");
+  
+  const zoomLevelElement = document.getElementById('zoom-level');
+  
+  // Update zoom level display
+  function updateZoomLevel() {
+    const currentZoom = window.partnerMap.getZoom();
+    if (zoomLevelElement) {
+      zoomLevelElement.textContent = currentZoom;
+    }
+  }
+  
+  // Listen for zoom events
+  window.partnerMap.on('zoomend', updateZoomLevel);
+  
+  // Set initial zoom level
+  updateZoomLevel();
+  
+  console.log("Zoom level indicator initialized");
 }
 
 function initializeLayerManager() {
