@@ -295,11 +295,15 @@ class LayerManager {
         Object.keys(this.layerConfigs).forEach(layerId => {
             const layerItem = document.querySelector(`[data-layer="${layerId}"]`);
             const toggle = layerItem.querySelector('.layer-toggle');
+            const toggleEye = toggle.querySelector('.toggle-eye');
             const countElement = document.getElementById(`${layerId}-count`);
             
             if (this.activeLayers.has(layerId)) {
                 layerItem.classList.add('active');
                 toggle.classList.add('active');
+                toggleEye.classList.remove('closed');
+                toggleEye.classList.add('open');
+                toggleEye.textContent = '👁';
                 const layerData = this.activeLayers.get(layerId);
                 if (countElement) {
                     countElement.textContent = layerData.count;
@@ -307,6 +311,9 @@ class LayerManager {
             } else {
                 layerItem.classList.remove('active');
                 toggle.classList.remove('active');
+                toggleEye.classList.remove('open');
+                toggleEye.classList.add('closed');
+                toggleEye.textContent = '🙈';
                 if (countElement) {
                     countElement.textContent = '0';
                 }

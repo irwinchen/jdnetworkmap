@@ -613,11 +613,14 @@ body {
   border-radius: 6px;
   z-index: 1500;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: auto;
+  max-height: 500px;
 }
 
 .layers-panel.collapsed {
-  transform: translateX(240px);
+  max-height: 60px; /* Just enough for the header */
 }
 
 .layers-header {
@@ -653,8 +656,18 @@ body {
   transform: scale(1.1);
 }
 
+.layers-panel.collapsed .toggle-icon {
+  transform: rotate(90deg);
+}
+
 .layers-content {
   padding: 15px;
+  transition: opacity 0.2s ease;
+}
+
+.layers-panel.collapsed .layers-content {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .layer-item {
@@ -746,6 +759,19 @@ body {
   opacity: 1;
 }
 
+.toggle-eye {
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.toggle-eye.closed {
+  opacity: 0.4;
+}
+
+.toggle-eye.open {
+  opacity: 1;
+}
+
 .layer-item.active .layer-toggle {
   opacity: 1;
 }
@@ -804,7 +830,7 @@ body {
   }
   
   .layers-panel.collapsed {
-    transform: translateX(220px);
+    max-height: 55px;
   }
   
   .layers-header {
