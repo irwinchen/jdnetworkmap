@@ -114,26 +114,11 @@ function addStateBoundaries() {
           fillOpacity: 0.1,
           fillColor: "#ff0064",
         },
-        onEachFeature: function (feature, layer) {
-          // Add state names to popups
-          if (feature.properties.name) {
-            layer.bindPopup(
-              `<div class="county-info"><h3>${feature.properties.name}</h3></div>`
-            );
-          }
-        },
+        // No popup functionality - just visual boundaries
       });
 
       stateLayer.addTo(window.partnerMap);
       console.log("State boundaries loaded successfully");
-      
-      // Add map click handler AFTER state boundaries to ensure proper event order
-      window.partnerMap.on("click", function (e) {
-        if (appState.mapMode === "add") {
-          console.log("Map clicked in add mode at:", e.latlng);
-          showPartnerForm(e.latlng);
-        }
-      });
     })
     .catch((error) => {
       console.error("Failed to load state boundaries:", error);
@@ -196,6 +181,14 @@ function initializePartnerControls() {
     console.error("Mode indicator not found!");
   }
   
+  // Map click handler for adding partners
+  window.partnerMap.on("click", function (e) {
+    if (appState.mapMode === "add") {
+      console.log("Map clicked in add mode at:", e.latlng);
+      showPartnerForm(e.latlng);
+    }
+  });
+
   console.log("Partner controls initialized");
 }
 
