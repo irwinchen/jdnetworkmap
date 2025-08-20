@@ -63,6 +63,12 @@ function initializeMap() {
     attributionControl: false,
   }).setView([39.8283, -98.5795], 4); // Centered on USA
 
+  // Add base tile layer (OpenStreetMap)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(window.partnerMap);
+
   // Add state boundary layer
   console.log("📍 Loading state boundaries...");
   addStateBoundaries();
