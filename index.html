@@ -23,33 +23,27 @@
   <body>
     <!-- Header -->
     <header class="header">
-      <div class="header-content">
-        <div class="header-left">
-          <h1>J+D Partner Network Map</h1>
+      <div class="logo-container">
+        <div class="title-section">
+          <div class="title">J+D Partner Network Map</div>
         </div>
-        <div class="header-right">
-          <!-- User info (shown when authenticated) -->
-          <div id="user-info" class="user-info" style="display: none">
-            <span id="user-email">user@example.com</span>
-            <button id="logout-btn" class="logout-btn">Logout</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Map Container -->
-      <div id="map" class="map-container"></div>
-
-      <!-- Controls -->
-      <div class="controls">
-        <!-- Add Partner Button moved here -->
+        
+        <!-- Add Partner Button moved back to header -->
         <button id="add-partner-btn" class="add-partner-btn" title="Toggle Add Partner Mode">
           Add Partner
         </button>
       </div>
-    </main>
+      <div class="controls">
+        <!-- User info (shown when authenticated) -->
+        <div id="user-info" class="user-info" style="display: none">
+          <span id="user-email">user@example.com</span>
+          <button id="logout-btn" class="btn-logout">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Map Container -->
+    <div id="map"></div>
 
     <!-- Authentication Overlay -->
     <div id="auth-overlay" class="auth-overlay">

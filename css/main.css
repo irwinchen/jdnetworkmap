@@ -628,7 +628,7 @@ body {
   display: none;
 }
 
-.user-name {
+.user-name, #user-email {
   color: #50f5c8;
   background-color: rgba(80, 245, 200, 0.1);
   border: 1px solid #50f5c8;
