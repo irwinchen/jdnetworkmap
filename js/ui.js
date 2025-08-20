@@ -233,6 +233,29 @@ function getMarkerConfig(partnerType) {
 
 // Create partner popup content
 function createPartnerPopup(partner) {
+  // Format date if available
+  let dateAddedText = '';
+  if (partner.dateAdded) {
+    try {
+      const date = new Date(partner.dateAdded);
+      dateAddedText = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short', 
+        day: 'numeric'
+      });
+    } catch (e) {
+      dateAddedText = 'Invalid date';
+    }
+  }
+
+  // Build user tracking section
+  const userTrackingSection = (partner.createdByEmail || partner.dateAdded) ? `
+    <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 0, 100, 0.2); font-size: 10px; color: #999;">
+      ${partner.createdByEmail ? `<div><strong>Added by:</strong> ${partner.createdByEmail}</div>` : ''}
+      ${dateAddedText ? `<div><strong>Date added:</strong> ${dateAddedText}</div>` : ''}
+    </div>
+  ` : '';
+
   const popupContent = `
     <div class="partner-popup">
       <h3 style="color: #FF0064; margin: 0 0 8px 0; font-size: 14px;">${partner.name}</h3>
@@ -244,6 +267,7 @@ function createPartnerPopup(partner) {
         ${partner.email ? `<div style="margin-bottom: 4px;"><strong>Email:</strong> <a href="mailto:${partner.email}" style="color: #50F5C8;">${partner.email}</a></div>` : ''}
         ${partner.phone ? `<div style="margin-bottom: 4px;"><strong>Phone:</strong> ${partner.phone}</div>` : ''}
         ${partner.website ? `<div style="margin-bottom: 4px;"><strong>Website:</strong> <a href="${partner.website}" target="_blank" style="color: #50F5C8;">Visit</a></div>` : ''}
+        ${userTrackingSection}
       </div>
     </div>`;
 

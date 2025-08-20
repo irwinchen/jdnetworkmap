@@ -454,6 +454,32 @@ class PartnerManager {
             content += `<p>${partner.description}</p>`;
         }
         
+        // Add user tracking info if available (Phase 4)
+        if (partner.createdByEmail || partner.dateAdded) {
+            let dateText = '';
+            if (partner.dateAdded) {
+                try {
+                    const date = new Date(partner.dateAdded);
+                    dateText = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                } catch (e) {
+                    dateText = 'Invalid date';
+                }
+            }
+            
+            content += `<div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid rgba(255, 0, 100, 0.3); font-size: 10px; color: #999;">`;
+            if (partner.createdByEmail) {
+                content += `<div><strong>Added by:</strong> ${partner.createdByEmail}</div>`;
+            }
+            if (dateText) {
+                content += `<div><strong>Date:</strong> ${dateText}</div>`;
+            }
+            content += `</div>`;
+        }
+        
         content += `<div style="margin-top: 10px;">
                     <button onclick="partnerManager.editPartner('${partner.id}')" style="background: #143CFF; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer; font-size: 11px;">Edit</button>
                     <button onclick="partnerManager.deletePartner('${partner.id}')" style="background: #666; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 11px;">Delete</button>

@@ -145,9 +145,24 @@ async function loadPartnersFromAirtable() {
         state: record.fields["State"] || "",
         county: record.fields["County"] || "",
         createdTime: record.createdTime,
+        
+        // User tracking fields (Phase 4) - may be null for existing partners
+        createdByUserId: record.fields["Created By User ID"] || null,
+        createdByEmail: record.fields["Created By Email"] || null,
+        dateAdded: record.fields["Date Added"] || null,
       }));
 
+      // Check if user tracking fields are available
+      const partnersWithTracking = partners.filter(p => p.createdByUserId).length;
+      const partnersWithoutTracking = partners.length - partnersWithTracking;
+      
       console.log(`✅ Loaded ${partners.length} partners from Airtable`);
+      if (partnersWithoutTracking > 0) {
+        console.log(`📊 User tracking data: ${partnersWithTracking} with tracking, ${partnersWithoutTracking} legacy partners`);
+      } else {
+        console.log(`📊 All partners have user tracking data`);
+      }
+      
       return { success: true, partners };
     } else {
       console.error("❌ Failed to load partners:", response.statusText);
@@ -163,9 +178,22 @@ async function loadPartnersFromAirtable() {
 async function savePartnerToAirtable(partnerData) {
   console.log("💾 Saving partner to Airtable:", partnerData);
 
+  // Validate authentication state before saving
+  if (!authState.isAuthenticated || !authState.userId || !authState.userEmail) {
+    console.error("❌ Cannot save partner: User not properly authenticated");
+    return { 
+      success: false, 
+      message: "Authentication required. Please log in again." 
+    };
+  }
+
   try {
+    // Create ISO timestamp for the current moment
+    const currentTimestamp = new Date().toISOString();
+
     const airtableRecord = {
       fields: {
+        // Existing partner fields
         "Partner Name": partnerData.name,
         "Partner Type": partnerData.type,
         "Address": partnerData.address || "",
@@ -177,8 +205,18 @@ async function savePartnerToAirtable(partnerData) {
         "Notes": partnerData.notes || "",
         "Latitude": parseFloat(partnerData.latitude),
         "Longitude": parseFloat(partnerData.longitude),
+        
+        // New user tracking fields (Phase 4)
+        "Created By User ID": authState.userId,
+        "Created By Email": authState.userEmail,
+        "Date Added": currentTimestamp,
       },
     };
+
+    console.log("👤 Adding user tracking data:");
+    console.log("  - User ID:", authState.userId);
+    console.log("  - User Email:", authState.userEmail);
+    console.log("  - Timestamp:", currentTimestamp);
 
     console.log("📋 Airtable record to save:", airtableRecord);
 
@@ -216,6 +254,7 @@ async function updatePartnerInAirtable(partnerId, partnerData) {
   try {
     const airtableRecord = {
       fields: {
+        // Partner data fields (only these are updated)
         "Partner Name": partnerData.name,
         "Partner Type": partnerData.type,
         "Address": partnerData.address || "",
@@ -227,8 +266,16 @@ async function updatePartnerInAirtable(partnerId, partnerData) {
         "Notes": partnerData.notes || "",
         "Latitude": parseFloat(partnerData.latitude),
         "Longitude": parseFloat(partnerData.longitude),
+        
+        // NOTE: User tracking fields are NOT updated during edits
+        // to preserve original creator information:
+        // - "Created By User ID" (preserved)
+        // - "Created By Email" (preserved) 
+        // - "Date Added" (preserved)
       },
     };
+
+    console.log("📝 Updating partner fields only (preserving creator info)");
 
     const response = await fetch(
       `${AIRTABLE_CONFIG.apiUrl}/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableName}/${partnerId}`,
