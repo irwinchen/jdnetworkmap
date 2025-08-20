@@ -601,6 +601,88 @@ body {
   font-weight: bold !important;
 }
 
+/* Layer-specific cluster styling */
+.layer-cluster-community-colleges {
+  border: 2px solid #ffffff !important;
+}
+.layer-cluster-community-colleges div {
+  background-color: rgba(245, 158, 11, 0.9) !important;
+  color: #ffffff !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+.layer-cluster-public-libraries {
+  border: 2px solid #ffffff !important;
+}
+.layer-cluster-public-libraries div {
+  background-color: rgba(139, 92, 246, 0.9) !important;
+  color: #ffffff !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+.layer-cluster-civic-organizations {
+  border: 2px solid #ffffff !important;
+}
+.layer-cluster-civic-organizations div {
+  background-color: rgba(16, 185, 129, 0.9) !important;
+  color: #ffffff !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+.layer-cluster-news-organizations {
+  border: 2px solid #ffffff !important;
+}
+.layer-cluster-news-organizations div {
+  background-color: rgba(239, 68, 68, 0.9) !important;
+  color: #ffffff !important;
+  font-family: "GT Pressura Mono", Monaco, monospace !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+/* Layer marker styles */
+.layer-marker {
+  transition: all 0.2s ease;
+}
+
+.layer-marker:hover {
+  transform: scale(1.2);
+  z-index: 1000;
+}
+
+/* Layer popup styles */
+.layer-popup {
+  min-width: 200px;
+}
+
+.layer-popup h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-family: "GT Sectra", Georgia, serif;
+}
+
+.layer-popup p {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.layer-popup a {
+  color: #FF0064;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.layer-popup a:hover {
+  text-decoration: underline;
+}
+
 /* Layers Panel Styles */
 .layers-panel {
   position: fixed;
@@ -802,6 +884,18 @@ body {
 .layer-item.disabled .layer-toggle {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+.layer-item.loading {
+  opacity: 0.7;
+  position: relative;
+}
+
+.layer-item.loading .layer-name::after {
+  content: ' (Loading...)';
+  font-size: 10px;
+  color: #999;
+  font-style: italic;
 }
 
 .visibility-indicator {

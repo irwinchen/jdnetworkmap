@@ -54,8 +54,12 @@ class LayerManager {
                 markerShape: 'square',
                 zIndex: 100,
                 dataSource: {
-                    type: 'mock', // Will be replaced with real data source
+                    type: 'mock',
                     count: 0
+                },
+                clustering: {
+                    enabled: true,
+                    maxRadius: 50
                 }
             },
             'community-colleges': {
@@ -65,8 +69,28 @@ class LayerManager {
                 markerShape: 'circle',
                 zIndex: 110,
                 dataSource: {
-                    type: 'mock',
-                    count: 0
+                    type: 'csv',
+                    url: '/data/hd2023.csv',
+                    filters: {
+                        SECTOR: '4',
+                        ICLEVEL: '2',
+                        CYACTIVE: '1'
+                    },
+                    fieldMapping: {
+                        id: 'UNITID',
+                        name: 'INSTNM',
+                        lat: 'LATITUDE',
+                        lng: 'LONGITUDE',
+                        address: 'ADDR',
+                        city: 'CITY',
+                        state: 'STABBR',
+                        zip: 'ZIP',
+                        website: 'WEBADDR'
+                    }
+                },
+                clustering: {
+                    enabled: true,
+                    maxRadius: 50
                 }
             },
             'civic-organizations': {
@@ -78,6 +102,10 @@ class LayerManager {
                 dataSource: {
                     type: 'mock',
                     count: 0
+                },
+                clustering: {
+                    enabled: true,
+                    maxRadius: 50
                 }
             },
             'news-organizations': {
@@ -89,6 +117,10 @@ class LayerManager {
                 dataSource: {
                     type: 'mock',
                     count: 0
+                },
+                clustering: {
+                    enabled: true,
+                    maxRadius: 50
                 }
             }
         };
@@ -109,10 +141,16 @@ class LayerManager {
         // Layer visibility toggles
         const layerToggles = document.querySelectorAll('.layer-toggle[data-action="toggle"]');
         layerToggles.forEach(toggle => {
-            toggle.addEventListener('click', (e) => {
+            toggle.addEventListener('click', async (e) => {
                 const layerItem = e.target.closest('.layer-item');
                 const layerId = layerItem.dataset.layer;
-                this.toggleLayer(layerId);
+                
+                // Prevent multiple clicks during loading
+                if (layerItem.classList.contains('loading')) {
+                    return;
+                }
+                
+                await this.toggleLayer(layerId);
             });
         });
         
@@ -146,7 +184,7 @@ class LayerManager {
     /**
      * Toggle layer visibility
      */
-    toggleLayer(layerId) {
+    async toggleLayer(layerId) {
         console.log('🎛️ Toggle layer:', layerId);
         
         const layerItem = document.querySelector(`[data-layer="${layerId}"]`);
@@ -158,7 +196,7 @@ class LayerManager {
         } else {
             // Layer is not active, try to activate it
             if (this.canActivateLayer()) {
-                this.activateLayer(layerId);
+                await this.activateLayer(layerId);
             } else {
                 this.showLayerLimitMessage();
             }
@@ -178,7 +216,7 @@ class LayerManager {
     /**
      * Activate a layer
      */
-    activateLayer(layerId) {
+    async activateLayer(layerId) {
         const config = this.layerConfigs[layerId];
         if (!config) {
             console.error('Layer config not found:', layerId);
@@ -187,25 +225,57 @@ class LayerManager {
         
         console.log('🎛️ Activating layer:', layerId);
         
-        // Create mock layer for now (will be replaced with real data loading)
-        const mockLayer = this.createMockLayer(config);
+        // Show loading state
+        this.setLayerLoadingState(layerId, true);
         
-        this.activeLayers.set(layerId, {
-            id: layerId,
-            name: config.name,
-            type: 'additional',
-            visible: true,
-            count: mockLayer.count,
-            zIndex: config.zIndex,
-            layer: mockLayer.layer
-        });
-        
-        // Add to map
-        if (mockLayer.layer) {
-            this.map.addLayer(mockLayer.layer);
+        try {
+            // Create layer based on data source type
+            const layerData = await this.createLayerFromConfig(config);
+            
+            // Add clustering if enabled
+            let finalLayer = layerData.layer;
+            if (config.clustering && config.clustering.enabled && layerData.count > 10) {
+                finalLayer = this.createClusteredLayer(layerData.layer, config);
+            }
+            
+            this.activeLayers.set(layerId, {
+                id: layerId,
+                name: config.name,
+                type: 'additional',
+                visible: true,
+                count: layerData.count,
+                zIndex: config.zIndex,
+                layer: finalLayer
+            });
+            
+            // Add to map
+            if (finalLayer) {
+                this.map.addLayer(finalLayer);
+            }
+            
+            console.log(`✅ Layer "${config.name}" activated with ${layerData.count} items`);
+            
+        } catch (error) {
+            console.error(`❌ Failed to activate layer "${config.name}":`, error);
+            
+            // Show error state and fallback to mock
+            const mockLayer = this.createMockLayer(config);
+            this.activeLayers.set(layerId, {
+                id: layerId,
+                name: config.name,
+                type: 'additional',
+                visible: true,
+                count: mockLayer.count,
+                zIndex: config.zIndex,
+                layer: mockLayer.layer
+            });
+            
+            if (mockLayer.layer) {
+                this.map.addLayer(mockLayer.layer);
+            }
+        } finally {
+            this.setLayerLoadingState(layerId, false);
         }
-        
-        console.log(`✅ Layer "${config.name}" activated`);
     }
     
     /**
@@ -235,20 +305,290 @@ class LayerManager {
     }
     
     /**
-     * Create a mock layer for testing (will be replaced with real data loading)
+     * Create a layer based on configuration (supports CSV, mock, and other sources)
+     */
+    async createLayerFromConfig(config) {
+        console.log('🎛️ Creating layer for:', config.name, 'Type:', config.dataSource.type);
+        
+        switch (config.dataSource.type) {
+            case 'csv':
+                return await this.createCsvLayer(config);
+            case 'geojson':
+                return await this.createGeoJsonLayer(config);
+            case 'mock':
+            default:
+                return this.createMockLayer(config);
+        }
+    }
+    
+    /**
+     * Create layer from CSV data source
+     */
+    async createCsvLayer(config) {
+        try {
+            console.log('📊 Loading CSV data from:', config.dataSource.url);
+            
+            const response = await fetch(config.dataSource.url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const csvText = await response.text();
+            const data = this.parseCsv(csvText);
+            const filteredData = this.applyFilters(data, config.dataSource.filters);
+            
+            return this.createMarkersFromData(filteredData, config);
+            
+        } catch (error) {
+            console.error('❌ Error loading CSV layer:', error);
+            // Fallback to mock layer
+            return this.createMockLayer(config);
+        }
+    }
+    
+    /**
+     * Parse CSV text into array of objects
+     */
+    parseCsv(csvText) {
+        const lines = csvText.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+        const data = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = this.parseCSVLine(lines[i]);
+            if (values.length === headers.length) {
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index];
+                });
+                data.push(row);
+            }
+        }
+        
+        console.log(`📊 Parsed ${data.length} rows from CSV`);
+        return data;
+    }
+    
+    /**
+     * Parse a single CSV line handling quoted values
+     */
+    parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            const nextChar = line[i + 1];
+            
+            if (char === '"') {
+                if (inQuotes && nextChar === '"') {
+                    current += '"';
+                    i++; // Skip next quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        result.push(current.trim());
+        return result;
+    }
+    
+    /**
+     * Apply filters to data array
+     */
+    applyFilters(data, filters) {
+        if (!filters || Object.keys(filters).length === 0) {
+            return data;
+        }
+        
+        const filtered = data.filter(row => {
+            return Object.entries(filters).every(([key, value]) => {
+                return row[key] && row[key].toString() === value.toString();
+            });
+        });
+        
+        console.log(`🔍 Filtered ${data.length} rows to ${filtered.length} matching records`);
+        return filtered;
+    }
+    
+    /**
+     * Create Leaflet markers from data array
+     */
+    createMarkersFromData(data, config) {
+        const mapping = config.dataSource.fieldMapping;
+        const layerGroup = L.layerGroup();
+        let validMarkers = 0;
+        
+        data.forEach((row, index) => {
+            try {
+                const lat = parseFloat(row[mapping.lat]);
+                const lng = parseFloat(row[mapping.lng]);
+                
+                // Skip rows with invalid coordinates
+                if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+                    return;
+                }
+                
+                // Create marker
+                const marker = this.createStyledMarker([lat, lng], config, row, mapping);
+                layerGroup.addLayer(marker);
+                validMarkers++;
+                
+            } catch (error) {
+                console.warn(`⚠️ Skipping invalid data row ${index}:`, error);
+            }
+        });
+        
+        console.log(`✅ Created ${validMarkers} markers for ${config.name}`);
+        
+        return {
+            layer: layerGroup,
+            count: validMarkers
+        };
+    }
+    
+    /**
+     * Create a styled marker based on layer configuration
+     */
+    createStyledMarker(coordinates, config, data, mapping) {
+        // Create marker with custom icon
+        const marker = L.circleMarker(coordinates, {
+            radius: 8,
+            fillColor: config.color,
+            color: '#ffffff',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.7,
+            className: `layer-marker ${config.id}`
+        });
+        
+        // Add popup with data
+        const popupContent = this.createPopupContent(data, mapping, config);
+        marker.bindPopup(popupContent);
+        
+        // Add tooltip
+        const name = data[mapping.name] || 'Unknown';
+        marker.bindTooltip(name, {
+            permanent: false,
+            direction: 'top',
+            offset: [0, -10]
+        });
+        
+        return marker;
+    }
+    
+    /**
+     * Create popup content for marker
+     */
+    createPopupContent(data, mapping, config) {
+        const name = data[mapping.name] || 'Unknown';
+        const address = data[mapping.address] || '';
+        const city = data[mapping.city] || '';
+        const state = data[mapping.state] || '';
+        const zip = data[mapping.zip] || '';
+        const website = data[mapping.website] || '';
+        
+        let html = `<div class="layer-popup ${config.id}">`;
+        html += `<h3 style="color: ${config.color}; margin-bottom: 8px;">${name}</h3>`;
+        
+        if (address) {
+            html += `<p><strong>Address:</strong><br>${address}`;
+            if (city || state || zip) {
+                html += `<br>${city}${city && (state || zip) ? ', ' : ''}${state}${state && zip ? ' ' : ''}${zip}`;
+            }
+            html += '</p>';
+        }
+        
+        if (website && website !== ' ') {
+            const url = website.startsWith('http') ? website : `https://${website}`;
+            html += `<p><a href="${url}" target="_blank" rel="noopener">Visit Website</a></p>`;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+    
+    /**
+     * Create layer from GeoJSON data source
+     */
+    async createGeoJsonLayer(config) {
+        try {
+            console.log('🗺️ Loading GeoJSON data from:', config.dataSource.url);
+            
+            const response = await fetch(config.dataSource.url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const geojsonData = await response.json();
+            const layerGroup = L.geoJSON(geojsonData, {
+                pointToLayer: (feature, latlng) => {
+                    return this.createStyledMarker(latlng, config, feature.properties, {
+                        name: 'name',
+                        address: 'address',
+                        city: 'city',
+                        state: 'state',
+                        zip: 'zip',
+                        website: 'website'
+                    });
+                }
+            });
+            
+            const count = geojsonData.features ? geojsonData.features.length : 0;
+            console.log(`✅ Created ${count} markers from GeoJSON for ${config.name}`);
+            
+            return {
+                layer: layerGroup,
+                count: count
+            };
+            
+        } catch (error) {
+            console.error('❌ Error loading GeoJSON layer:', error);
+            return this.createMockLayer(config);
+        }
+    }
+    
+    /**
+     * Create a mock layer for testing
      */
     createMockLayer(config) {
         console.log('🎭 Creating mock layer for:', config.name);
         
-        // For now, return empty layer with zero count
-        // In real implementation, this would load data from external sources
         const mockLayer = L.layerGroup();
+        const mockCount = Math.floor(Math.random() * 30) + 10; // Random 10-40 items
         
-        // Add a few mock markers for demonstration
-        const mockCount = Math.floor(Math.random() * 50) + 10; // Random 10-60 items
-        
-        // We'll add actual mock markers in the next iteration
-        // For now, just return the layer group
+        // Add some mock markers around the US
+        for (let i = 0; i < mockCount; i++) {
+            const lat = 25 + Math.random() * 25; // US latitude range
+            const lng = -125 + Math.random() * 50; // US longitude range
+            
+            const marker = L.circleMarker([lat, lng], {
+                radius: 6,
+                fillColor: config.color,
+                color: '#ffffff',
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0.6,
+                className: `layer-marker ${config.id} mock`
+            });
+            
+            marker.bindPopup(`
+                <div class="layer-popup ${config.id}">
+                    <h3 style="color: ${config.color};">Mock ${config.name} #${i + 1}</h3>
+                    <p>This is a test marker for the ${config.name} layer.</p>
+                    <p><em>Real data will replace these markers.</em></p>
+                </div>
+            `);
+            
+            mockLayer.addLayer(marker);
+        }
         
         return {
             layer: mockLayer,
@@ -389,6 +729,63 @@ class LayerManager {
      */
     isLayerActive(layerId) {
         return this.activeLayers.has(layerId);
+    }
+    
+    /**
+     * Create a clustered layer for markers
+     */
+    createClusteredLayer(layerGroup, config) {
+        console.log('🔗 Creating clustered layer for:', config.name);
+        
+        const clusterGroup = L.markerClusterGroup({
+            maxClusterRadius: config.clustering.maxRadius || 50,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let className = 'marker-cluster-small';
+                let size = 'small';
+                
+                if (count >= 100) {
+                    className = 'marker-cluster-large';
+                    size = 'large';
+                } else if (count >= 10) {
+                    className = 'marker-cluster-medium';
+                    size = 'medium';
+                }
+                
+                return new L.DivIcon({
+                    html: `<div style="background-color: ${config.color};"><span>${count}</span></div>`,
+                    className: `marker-cluster ${className} layer-cluster-${config.id}`,
+                    iconSize: new L.Point(40, 40)
+                });
+            },
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true
+        });
+        
+        // Add all markers to cluster group
+        layerGroup.eachLayer(layer => {
+            clusterGroup.addLayer(layer);
+        });
+        
+        return clusterGroup;
+    }
+    
+    /**
+     * Set loading state for a layer
+     */
+    setLayerLoadingState(layerId, isLoading) {
+        const layerItem = document.querySelector(`[data-layer="${layerId}"]`);
+        const countElement = document.getElementById(`${layerId}-count`);
+        
+        if (isLoading) {
+            layerItem.classList.add('loading');
+            if (countElement) {
+                countElement.textContent = '...';
+            }
+        } else {
+            layerItem.classList.remove('loading');
+        }
     }
 }
 
