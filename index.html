@@ -14,8 +14,14 @@
     />
 
     <!-- Leaflet MarkerCluster CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+    />
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
@@ -54,9 +60,13 @@
           </svg>
           <div class="title">J+D Partner Network Map</div>
         </div>
-        
+
         <!-- Add Partner Button moved back to header -->
-        <button id="add-partner-btn" class="add-partner-btn" title="Toggle Add Partner Mode">
+        <button
+          id="add-partner-btn"
+          class="add-partner-btn"
+          title="Toggle Add Partner Mode"
+        >
           Add Partner
         </button>
       </div>
@@ -75,10 +85,19 @@
     <!-- Authentication Overlay -->
     <div id="auth-overlay" class="auth-overlay">
       <div class="auth-message">
-        <h2>Authentication Required</h2>
-        <p>Please authenticate with Airtable to access the J+D Partner Network Map.</p>
-        <p><strong>You must have access to the "J+D Lab Network" base in Airtable.</strong></p>
-        <button id="airtable-login-btn" class="btn-auth">Authenticate with Airtable</button>
+        <h2>Login with Airtable</h2>
+        <p>
+          Please login with your J+D Airtable account to access the J+D Partner
+          Network Map.
+        </p>
+        <p>
+          <strong
+            >On the Airtable access screen, select the "J+D Lab Network"
+            base.</strong
+          >
+        </p>
+        <img src="help_airtable_login.png" />
+        <button id="airtable-login-btn" class="btn-auth">Login</button>
         <div id="auth-error" class="auth-error"></div>
       </div>
     </div>
@@ -106,7 +125,11 @@
     <div id="layers-panel" class="layers-panel">
       <div class="layers-header">
         <h3>Layers</h3>
-        <button id="layers-toggle" class="layers-toggle" title="Toggle Layers Panel">
+        <button
+          id="layers-toggle"
+          class="layers-toggle"
+          title="Toggle Layers Panel"
+        >
           <i data-lucide="chevron-down" class="toggle-icon"></i>
         </button>
       </div>
@@ -114,7 +137,10 @@
         <!-- J+D Partners Layer (always visible, non-toggleable) -->
         <div class="layer-item layer-base" data-layer="jd-partners">
           <div class="layer-info">
-            <div class="layer-color-indicator" style="background-color: #FF0064;"></div>
+            <div
+              class="layer-color-indicator"
+              style="background-color: #ff0064"
+            ></div>
             <div class="layer-details">
               <span class="layer-name">J+D Partners</span>
               <span class="layer-count" id="jd-partners-count">0</span>
@@ -130,14 +156,21 @@
         <!-- Available Additional Layers -->
         <div class="layer-item" data-layer="public-libraries">
           <div class="layer-info">
-            <div class="layer-color-indicator" style="background-color: #8B5CF6;"></div>
+            <div
+              class="layer-color-indicator"
+              style="background-color: #8b5cf6"
+            ></div>
             <div class="layer-details">
               <span class="layer-name">Public Libraries</span>
               <span class="layer-count" id="public-libraries-count">0</span>
             </div>
           </div>
           <div class="layer-controls">
-            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
               <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
@@ -145,14 +178,21 @@
 
         <div class="layer-item" data-layer="community-colleges">
           <div class="layer-info">
-            <div class="layer-color-indicator" style="background-color: #F59E0B;"></div>
+            <div
+              class="layer-color-indicator"
+              style="background-color: #f59e0b"
+            ></div>
             <div class="layer-details">
               <span class="layer-name">Community Colleges</span>
               <span class="layer-count" id="community-colleges-count">0</span>
             </div>
           </div>
           <div class="layer-controls">
-            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
               <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
@@ -160,14 +200,21 @@
 
         <div class="layer-item" data-layer="civic-organizations">
           <div class="layer-info">
-            <div class="layer-color-indicator" style="background-color: #10B981;"></div>
+            <div
+              class="layer-color-indicator"
+              style="background-color: #10b981"
+            ></div>
             <div class="layer-details">
               <span class="layer-name">Civic Organizations</span>
               <span class="layer-count" id="civic-organizations-count">0</span>
             </div>
           </div>
           <div class="layer-controls">
-            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
               <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
@@ -175,14 +222,21 @@
 
         <div class="layer-item" data-layer="news-organizations">
           <div class="layer-info">
-            <div class="layer-color-indicator" style="background-color: #EF4444;"></div>
+            <div
+              class="layer-color-indicator"
+              style="background-color: #ef4444"
+            ></div>
             <div class="layer-details">
               <span class="layer-name">News Organizations</span>
               <span class="layer-count" id="news-organizations-count">0</span>
             </div>
           </div>
           <div class="layer-controls">
-            <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
               <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
@@ -206,7 +260,12 @@
           <div class="form-row">
             <div class="form-group">
               <label for="partner-name">Organization Name *</label>
-              <input type="text" id="partner-name" name="partner-name" required />
+              <input
+                type="text"
+                id="partner-name"
+                name="partner-name"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="partner-type">Partner Type *</label>
@@ -226,8 +285,15 @@
           <div class="form-row">
             <div class="form-group full-width">
               <label for="partner-address">Address</label>
-              <input type="text" id="partner-address" name="partner-address" placeholder="Street address, City, State, ZIP" />
-              <button type="button" id="geocode-address" class="geocode-btn">Geocode Address</button>
+              <input
+                type="text"
+                id="partner-address"
+                name="partner-address"
+                placeholder="Street address, City, State, ZIP"
+              />
+              <button type="button" id="geocode-address" class="geocode-btn">
+                Geocode Address
+              </button>
               <div class="geocoding-status"></div>
             </div>
           </div>
@@ -235,55 +301,103 @@
           <div class="form-row">
             <div class="form-group">
               <label for="partner-latitude">Latitude *</label>
-              <input type="number" id="partner-latitude" name="partner-latitude" step="any" readonly required />
+              <input
+                type="number"
+                id="partner-latitude"
+                name="partner-latitude"
+                step="any"
+                readonly
+                required
+              />
             </div>
             <div class="form-group">
               <label for="partner-longitude">Longitude *</label>
-              <input type="number" id="partner-longitude" name="partner-longitude" step="any" readonly required />
+              <input
+                type="number"
+                id="partner-longitude"
+                name="partner-longitude"
+                step="any"
+                readonly
+                required
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group full-width">
               <label for="partner-description">Description</label>
-              <textarea id="partner-description" name="partner-description" rows="3" placeholder="Brief description of the organization..."></textarea>
+              <textarea
+                id="partner-description"
+                name="partner-description"
+                rows="3"
+                placeholder="Brief description of the organization..."
+              ></textarea>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="partner-contact">Contact Person</label>
-              <input type="text" id="partner-contact" name="partner-contact" placeholder="Contact name" />
+              <input
+                type="text"
+                id="partner-contact"
+                name="partner-contact"
+                placeholder="Contact name"
+              />
             </div>
             <div class="form-group">
               <label for="partner-email">Contact Email</label>
-              <input type="email" id="partner-email" name="partner-email" placeholder="contact@organization.org" />
+              <input
+                type="email"
+                id="partner-email"
+                name="partner-email"
+                placeholder="contact@organization.org"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="partner-phone">Contact Phone</label>
-              <input type="tel" id="partner-phone" name="partner-phone" placeholder="(555) 123-4567" />
+              <input
+                type="tel"
+                id="partner-phone"
+                name="partner-phone"
+                placeholder="(555) 123-4567"
+              />
             </div>
             <div class="form-group">
               <label for="partner-project-link">Project Tracking Link</label>
-              <input type="url" id="partner-project-link" name="partner-project-link" placeholder="https://..." />
+              <input
+                type="url"
+                id="partner-project-link"
+                name="partner-project-link"
+                placeholder="https://..."
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group full-width">
               <label for="partner-notes">Notes</label>
-              <textarea id="partner-notes" name="partner-notes" rows="2" placeholder="Additional notes..."></textarea>
+              <textarea
+                id="partner-notes"
+                name="partner-notes"
+                rows="2"
+                placeholder="Additional notes..."
+              ></textarea>
             </div>
           </div>
 
           <div id="save-progress" class="save-progress hidden">Saving...</div>
 
           <div class="form-actions">
-            <button type="submit" id="save-partner-btn" class="save-btn">Save Partner</button>
-            <button type="button" id="cancel-partner" class="cancel-btn">Cancel</button>
+            <button type="submit" id="save-partner-btn" class="save-btn">
+              Save Partner
+            </button>
+            <button type="button" id="cancel-partner" class="cancel-btn">
+              Cancel
+            </button>
           </div>
         </form>
       </div>
@@ -301,7 +415,7 @@
 
     <!-- Partner Management System -->
     <script src="js/partners.js"></script>
-    
+
     <!-- Layer Management System -->
     <script src="js/layerManager.js"></script>
 
@@ -315,8 +429,8 @@
     <!-- Initialize Lucide Icons -->
     <script>
       // Initialize Lucide icons after DOM is loaded
-      document.addEventListener('DOMContentLoaded', function() {
-        if (typeof lucide !== 'undefined') {
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof lucide !== "undefined") {
           lucide.createIcons();
         }
       });

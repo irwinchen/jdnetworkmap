@@ -1153,6 +1153,15 @@ body {
   line-height: 1.6;
 }
 
+.auth-message img {
+  max-width: 100%;
+  height: auto;
+  margin: 20px 0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .btn-auth {
   padding: 15px 30px;
   border: none;
