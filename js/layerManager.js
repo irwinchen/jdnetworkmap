@@ -55,7 +55,18 @@ class LayerManager {
                 zIndex: 100,
                 dataSource: {
                     type: 'mock',
-                    count: 0
+                    count: 0,
+                    fieldMapping: {
+                        id: ['lib_id', 'fscskey', 'id', 'ID'],
+                        name: ['libname', 'library_name', 'name', 'NAME'],
+                        lat: ['latitude', 'LATITUDE', 'lat', 'LAT', 'y'],
+                        lng: ['longitude', 'LONGITUDE', 'lng', 'LON', 'LONG', 'x'],
+                        address: ['address', 'ADDRESS', 'street', 'location'],
+                        city: ['city', 'CITY', 'town', 'TOWN'],
+                        state: ['stabr', 'state', 'STATE', 'st'],
+                        zip: ['zip', 'ZIP', 'zipcode', 'postal_code'],
+                        website: ['webaddr', 'website', 'url', 'web_address']
+                    }
                 },
                 clustering: {
                     enabled: true,
@@ -77,15 +88,15 @@ class LayerManager {
                         CYACTIVE: '1'
                     },
                     fieldMapping: {
-                        id: 'UNITID',
-                        name: 'INSTNM',
-                        lat: 'LATITUDE',
-                        lng: 'LONGITUDE',
-                        address: 'ADDR',
-                        city: 'CITY',
-                        state: 'STABBR',
-                        zip: 'ZIP',
-                        website: 'WEBADDR'
+                        id: ['UNITID', 'ID', 'id'],
+                        name: ['INSTNM', 'NAME', 'name', 'institution_name', 'org_name'],
+                        lat: ['LATITUDE', 'lat', 'latitude', 'LAT', 'y', 'Y'],
+                        lng: ['LONGITUD', 'LONGITUDE', 'lng', 'longitude', 'LON', 'LONG', 'x', 'X'],
+                        address: ['ADDR', 'ADDRESS', 'address', 'street', 'street_address'],
+                        city: ['CITY', 'city', 'TOWN', 'town'],
+                        state: ['STABBR', 'STATE', 'state', 'ST', 'st'],
+                        zip: ['ZIP', 'zip', 'zipcode', 'postal_code', 'ZIPCODE'],
+                        website: ['WEBADDR', 'WEBSITE', 'website', 'url', 'URL', 'web_url']
                     }
                 },
                 clustering: {
@@ -101,7 +112,18 @@ class LayerManager {
                 zIndex: 120,
                 dataSource: {
                     type: 'mock',
-                    count: 0
+                    count: 0,
+                    fieldMapping: {
+                        id: ['org_id', 'id', 'ID', 'organization_id'],
+                        name: ['org_name', 'organization_name', 'name', 'NAME'],
+                        lat: ['latitude', 'LATITUDE', 'lat', 'LAT', 'y'],
+                        lng: ['longitude', 'LONGITUDE', 'lng', 'LON', 'LONG', 'x'],
+                        address: ['address', 'ADDRESS', 'street', 'location'],
+                        city: ['city', 'CITY', 'town', 'TOWN'],
+                        state: ['state', 'STATE', 'st', 'ST'],
+                        zip: ['zip', 'ZIP', 'zipcode', 'postal_code'],
+                        website: ['website', 'url', 'web_address', 'homepage']
+                    }
                 },
                 clustering: {
                     enabled: true,
@@ -116,7 +138,18 @@ class LayerManager {
                 zIndex: 130,
                 dataSource: {
                     type: 'mock',
-                    count: 0
+                    count: 0,
+                    fieldMapping: {
+                        id: ['outlet_id', 'media_id', 'id', 'ID'],
+                        name: ['outlet_name', 'media_name', 'publication_name', 'name', 'NAME'],
+                        lat: ['latitude', 'LATITUDE', 'lat', 'LAT', 'y'],
+                        lng: ['longitude', 'LONGITUDE', 'lng', 'LON', 'LONG', 'x'],
+                        address: ['address', 'ADDRESS', 'street', 'location'],
+                        city: ['city', 'CITY', 'town', 'TOWN'],
+                        state: ['state', 'STATE', 'st', 'ST'],
+                        zip: ['zip', 'ZIP', 'zipcode', 'postal_code'],
+                        website: ['website', 'url', 'web_address', 'homepage']
+                    }
                 },
                 clustering: {
                     enabled: true,
@@ -419,10 +452,42 @@ class LayerManager {
     }
     
     /**
+     * Resolve field mapping to actual column names from data
+     */
+    resolveFieldMapping(data, fieldMapping) {
+        if (!data.length) return {};
+        
+        const sampleRow = data[0];
+        const availableFields = Object.keys(sampleRow);
+        const resolvedMapping = {};
+        
+        Object.entries(fieldMapping).forEach(([key, possibleFields]) => {
+            // If it's already a string, keep it as-is for backwards compatibility
+            if (typeof possibleFields === 'string') {
+                resolvedMapping[key] = possibleFields;
+                return;
+            }
+            
+            // If it's an array, find the first match
+            if (Array.isArray(possibleFields)) {
+                const matchedField = possibleFields.find(field => 
+                    availableFields.includes(field)
+                );
+                resolvedMapping[key] = matchedField || possibleFields[0]; // fallback to first option
+            }
+        });
+        
+        console.log('🗂️ Resolved field mapping:', resolvedMapping);
+        console.log('📋 Available fields:', availableFields.slice(0, 10), availableFields.length > 10 ? '...' : '');
+        
+        return resolvedMapping;
+    }
+    
+    /**
      * Create Leaflet markers from data array
      */
     createMarkersFromData(data, config) {
-        const mapping = config.dataSource.fieldMapping;
+        const mapping = this.resolveFieldMapping(data, config.dataSource.fieldMapping);
         const layerGroup = L.layerGroup();
         let validMarkers = 0;
         
@@ -431,8 +496,16 @@ class LayerManager {
                 const lat = parseFloat(row[mapping.lat]);
                 const lng = parseFloat(row[mapping.lng]);
                 
+                // Debug first few coordinate pairs
+                if (index < 5) {
+                    console.log(`🔍 Row ${index}: lat=${row[mapping.lat]} (${lat}), lng=${row[mapping.lng]} (${lng})`);
+                }
+                
                 // Skip rows with invalid coordinates
                 if (isNaN(lat) || isNaN(lng) || lat === 0 || lng === 0) {
+                    if (index < 10) {
+                        console.warn(`⚠️ Skipping row ${index}: invalid coordinates lat=${lat}, lng=${lng}`);
+                    }
                     return;
                 }
                 
@@ -530,14 +603,9 @@ class LayerManager {
             const geojsonData = await response.json();
             const layerGroup = L.geoJSON(geojsonData, {
                 pointToLayer: (feature, latlng) => {
-                    return this.createStyledMarker(latlng, config, feature.properties, {
-                        name: 'name',
-                        address: 'address',
-                        city: 'city',
-                        state: 'state',
-                        zip: 'zip',
-                        website: 'website'
-                    });
+                    // For GeoJSON, resolve mapping against feature properties
+                    const resolvedMapping = this.resolveFieldMapping([feature.properties], config.dataSource.fieldMapping);
+                    return this.createStyledMarker(latlng, config, feature.properties, resolvedMapping);
                 }
             });
             
