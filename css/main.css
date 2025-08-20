@@ -203,7 +203,7 @@ body {
 }
 
 /* Partner Form Modal */
-.partner-modal {
+.modal, .partner-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -217,11 +217,11 @@ body {
   align-items: center;
 }
 
-.partner-modal.visible {
+.modal.visible, .partner-modal.visible {
   display: flex;
 }
 
-.partner-modal-content {
+.modal-content, .partner-modal-content {
   background-color: #373737;
   border: 2px solid #ff0064;
   border-radius: 8px;
@@ -234,19 +234,40 @@ body {
   box-shadow: 0 10px 30px rgba(255, 0, 100, 0.3);
 }
 
-.partner-modal h2 {
-  color: #ff0064;
+.modal-header {
+  position: relative;
   margin-bottom: 20px;
+}
+
+.modal-header h2, .modal h2, .partner-modal h2 {
+  color: #ff0064;
+  margin-bottom: 0;
   font-size: 24px;
   text-align: center;
   font-family: "Georgia", serif;
 }
 
-.partner-form-group {
+/* Form Groups and Rows */
+.form-group, .partner-form-group {
   margin-bottom: 20px;
 }
 
-.partner-form-group label {
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.form-row .form-group.full-width {
+  flex: 1 1 100%;
+}
+
+.form-group label, .partner-form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: bold;
@@ -257,6 +278,9 @@ body {
   letter-spacing: 1px;
 }
 
+.form-group input,
+.form-group select,
+.form-group textarea,
 .partner-form-group input,
 .partner-form-group select,
 .partner-form-group textarea {
@@ -271,6 +295,9 @@ body {
   box-sizing: border-box;
 }
 
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
 .partner-form-group input:focus,
 .partner-form-group select:focus,
 .partner-form-group textarea:focus {
@@ -279,7 +306,7 @@ body {
   box-shadow: 0 0 5px rgba(80, 245, 200, 0.3);
 }
 
-.partner-form-group textarea {
+.form-group textarea, .partner-form-group textarea {
   resize: vertical;
   min-height: 80px;
 }
@@ -362,15 +389,62 @@ body {
   border: 1px solid rgba(255, 0, 100, 0.3);
 }
 
-.partner-btn-geocode {
+/* Button Styles */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.save-btn, .cancel-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Monaco", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background: #ff0064;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #e00559;
+  transform: translateY(-1px);
+}
+
+.cancel-btn {
+  background: #666;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #555;
+  transform: translateY(-1px);
+}
+
+.geocode-btn, .partner-btn-geocode {
   background: #143cff;
   color: white;
   font-size: 11px;
   padding: 8px 12px;
   margin-top: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Monaco", monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
 }
 
-.partner-btn-geocode:hover {
+.geocode-btn:hover, .partner-btn-geocode:hover {
   background: #0f2ecc;
 }
 
