@@ -43,6 +43,16 @@ async function testAirtableAuth() {
         } catch (e) {
           console.log("Could not fetch table metadata");
         }
+      } else {
+        console.error("❌ Auth test failed:", response.status, response.statusText);
+        
+        // Get detailed error for auth test
+        try {
+          const errorData = await response.text();
+          console.error("❌ Auth test error details:", errorData);
+        } catch (e) {
+          console.error("❌ Could not read auth test error response");
+        }
       }
     } catch (error) {
       console.error("❌ Airtable request failed:", error);
@@ -165,7 +175,21 @@ async function loadPartnersFromAirtable() {
       
       return { success: true, partners };
     } else {
-      console.error("❌ Failed to load partners:", response.statusText);
+      console.error("❌ Failed to load partners:", response.status, response.statusText);
+      
+      // Get detailed error message
+      try {
+        const errorData = await response.text();
+        console.error("❌ Error details:", errorData);
+      } catch (e) {
+        console.error("❌ Could not read error response");
+      }
+      
+      // If 401, might need to re-authenticate
+      if (response.status === 401) {
+        console.error("❌ Token appears to be invalid or expired. User may need to re-authenticate.");
+      }
+      
       return { success: false, partners: [] };
     }
   } catch (error) {
