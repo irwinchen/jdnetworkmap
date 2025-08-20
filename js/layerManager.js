@@ -85,7 +85,7 @@ class LayerManager {
                 zIndex: 110,
                 dataSource: {
                     type: 'csv',
-                    url: '/data/hd2023.csv',
+                    url: '/data/Community_Colleges/hd2023.csv',
                     filters: {
                         SECTOR: '4',
                         ICLEVEL: '2',
