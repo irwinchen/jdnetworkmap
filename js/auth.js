@@ -111,7 +111,7 @@ async function handleOAuthCallback() {
       console.log("🔍 User name field:", userInfo.name || "not available");
       console.log("🔍 User email field:", userInfo.email || "not available");
 
-      // Verify access to required Partners base
+      // Verify access to required J+D Lab Network base
       const hasBaseAccess = await verifyBaseAccess(
         tokenResponse.access_token
       );
@@ -142,9 +142,9 @@ async function handleOAuthCallback() {
 
         return true;
       } else {
-        console.error("❌ User does not have access to the required Partners base");
+        console.error("❌ User does not have access to the required J+D Lab Network base");
         showAuthError(
-          "Access denied: You must grant access to the Partners base to use this application. Please try authenticating again and make sure to select the 'Partners' base during authorization."
+          "Access denied: You must grant access to the J+D Lab Network base to use this application. Please try authenticating again and make sure to select the 'J+D Lab Network' base during authorization."
         );
         return false;
       }
@@ -266,9 +266,9 @@ async function getUserInfo(accessToken) {
 }
 
 async function verifyBaseAccess(accessToken) {
-  console.log("🔍 Verifying access to required Partners base...");
+  console.log("🔍 Verifying access to required J+D Lab Network base...");
   try {
-    // Try to access the specific Partners base
+    // Try to access the specific J+D Lab Network base
     const response = await fetch(
       `https://api.airtable.com/v0/${OAUTH_CONFIG.requiredBaseId}/${AIRTABLE_CONFIG.tableName}?maxRecords=1`,
       {
@@ -279,10 +279,10 @@ async function verifyBaseAccess(accessToken) {
     );
 
     if (response.ok) {
-      console.log("✅ User has access to required Partners base");
+      console.log("✅ User has access to required J+D Lab Network base");
       return true;
     } else {
-      console.log("❌ User does not have access to required Partners base");
+      console.log("❌ User does not have access to required J+D Lab Network base");
       console.log("Response status:", response.status);
       const errorText = await response.text();
       console.log("Error details:", errorText);

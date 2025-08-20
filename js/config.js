@@ -7,7 +7,7 @@ const OAUTH_CONFIG = {
   scope: "data.records:read data.records:write user.email:read",
   airtableUrl: "https://www.airtable.com",
   targetWorkspaceId: "wsp521eG1mYR4mexh",
-  requiredBaseId: "appwdh7OXsghNRy6k", // Partners base ID
+  requiredBaseId: "appwdh7OXsghNRy6k", // J+D Lab Network base ID
   lambdaProxyUrl: "https://89ylgt7orf.execute-api.us-east-1.amazonaws.com/prod/oauth",
 };
 
