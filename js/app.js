@@ -128,9 +128,15 @@ function addStateBoundaries() {
 function initializeMarkerClusters() {
   // Create marker cluster group with custom options
   window.partnerMarkers = L.markerClusterGroup({
-    // Cluster radius based on zoom level for better state awareness
+    // Disable clustering at US-level view to prevent cross-state clustering
     maxClusterRadius: function(zoom) {
-      return zoom <= 5 ? 200 : zoom <= 7 ? 100 : 50; // State level: 200px, Regional: 100px, City: 50px  
+      if (zoom <= 6) {
+        return 0; // No clustering at US/continental level (zoom 4-6)
+      } else if (zoom <= 9) {
+        return 50; // Small radius for regional clustering (zoom 7-9)
+      } else {
+        return 30; // Very small radius for city-level clustering (zoom 10+)
+      }
     },
     // Custom icon creation
     iconCreateFunction: function(cluster) {
@@ -149,7 +155,7 @@ function initializeMarkerClusters() {
         iconSize: new L.Point(40, 40)
       });
     },
-    // Only cluster markers that are close AND in the same state (basic implementation)
+    // Completely disable clustering at city level and above
     disableClusteringAtZoom: 12, // Stop clustering when zoomed in to city level
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
