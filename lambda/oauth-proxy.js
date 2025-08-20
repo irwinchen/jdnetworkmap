@@ -5,8 +5,9 @@ exports.handler = async (event) => {
     // Enable CORS for your Amplify domain
     const corsHeaders = {
         'Access-Control-Allow-Origin': 'https://master.d3u92f9fdv7kxv.amplifyapp.com',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Credentials': 'false',
         'Content-Type': 'application/json',
     };
 
