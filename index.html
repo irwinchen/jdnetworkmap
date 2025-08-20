@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
     <!-- Main Application Styles -->
     <link rel="stylesheet" href="css/main.css" />
   </head>
@@ -90,7 +93,7 @@
       <div class="layers-header">
         <h3>Layers</h3>
         <button id="layers-toggle" class="layers-toggle" title="Toggle Layers Panel">
-          <span class="toggle-icon">◀</span>
+          <i data-lucide="chevron-left" class="toggle-icon"></i>
         </button>
       </div>
       <div class="layers-content">
@@ -104,7 +107,9 @@
             </div>
           </div>
           <div class="layer-controls">
-            <div class="visibility-indicator active" title="Always visible">👁</div>
+            <div class="visibility-indicator active" title="Always visible">
+              <i data-lucide="eye" class="eye-icon"></i>
+            </div>
           </div>
         </div>
 
@@ -119,7 +124,7 @@
           </div>
           <div class="layer-controls">
             <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
-              <span class="toggle-eye closed">🙈</span>
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
         </div>
@@ -134,7 +139,7 @@
           </div>
           <div class="layer-controls">
             <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
-              <span class="toggle-eye closed">🙈</span>
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
         </div>
@@ -149,7 +154,7 @@
           </div>
           <div class="layer-controls">
             <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
-              <span class="toggle-eye closed">🙈</span>
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
         </div>
@@ -164,7 +169,7 @@
           </div>
           <div class="layer-controls">
             <button class="layer-toggle" data-action="toggle" title="Toggle layer visibility">
-              <span class="toggle-eye closed">🙈</span>
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
             </button>
           </div>
         </div>
@@ -292,5 +297,15 @@
     <script src="js/airtable.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      // Initialize Lucide icons after DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      });
+    </script>
   </body>
 </html>

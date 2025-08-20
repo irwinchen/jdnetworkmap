@@ -21,6 +21,13 @@ class LayerManager {
         // Initialize UI
         this.initializeUI();
         
+        // Initialize Lucide icons
+        setTimeout(() => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }, 100);
+        
         // Always add J+D partners as the base layer
         this.activeLayers.set('jd-partners', {
             id: 'jd-partners',
@@ -117,16 +124,14 @@ class LayerManager {
      */
     togglePanel() {
         const panel = document.getElementById('layers-panel');
-        const toggleIcon = document.querySelector('.toggle-icon');
+        const toggleButton = panel.querySelector('#layers-toggle');
         
         panel.classList.toggle('collapsed');
         
         if (panel.classList.contains('collapsed')) {
-            toggleIcon.textContent = '▶';
-            toggleIcon.parentElement.setAttribute('title', 'Show Layers Panel');
+            toggleButton.setAttribute('title', 'Show Layers Panel');
         } else {
-            toggleIcon.textContent = '◀';
-            toggleIcon.parentElement.setAttribute('title', 'Hide Layers Panel');
+            toggleButton.setAttribute('title', 'Hide Layers Panel');
         }
     }
     
@@ -303,7 +308,7 @@ class LayerManager {
                 toggle.classList.add('active');
                 toggleEye.classList.remove('closed');
                 toggleEye.classList.add('open');
-                toggleEye.textContent = '👁';
+                toggleEye.setAttribute('data-lucide', 'eye');
                 const layerData = this.activeLayers.get(layerId);
                 if (countElement) {
                     countElement.textContent = layerData.count;
@@ -313,7 +318,7 @@ class LayerManager {
                 toggle.classList.remove('active');
                 toggleEye.classList.remove('open');
                 toggleEye.classList.add('closed');
-                toggleEye.textContent = '🙈';
+                toggleEye.setAttribute('data-lucide', 'eye-off');
                 if (countElement) {
                     countElement.textContent = '0';
                 }
@@ -339,6 +344,11 @@ class LayerManager {
         if (jdCountElement && this.activeLayers.has('jd-partners')) {
             const jdLayer = this.activeLayers.get('jd-partners');
             jdCountElement.textContent = jdLayer.count;
+        }
+        
+        // Refresh Lucide icons after updates
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     }
     

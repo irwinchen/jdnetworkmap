@@ -648,7 +648,9 @@ body {
   padding: 4px 8px;
   border-radius: 3px;
   transition: all 0.2s ease;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .layers-toggle:hover {
@@ -656,8 +658,14 @@ body {
   transform: scale(1.1);
 }
 
+.toggle-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
 .layers-panel.collapsed .toggle-icon {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 .layers-content {
@@ -760,7 +768,8 @@ body {
 }
 
 .toggle-eye {
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
   transition: all 0.2s ease;
 }
 
@@ -770,6 +779,12 @@ body {
 
 .toggle-eye.open {
   opacity: 1;
+}
+
+.eye-icon {
+  width: 16px;
+  height: 16px;
+  color: #50F5C8;
 }
 
 .layer-item.active .layer-toggle {
@@ -782,7 +797,9 @@ body {
 }
 
 .visibility-indicator {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 1;
   color: #50F5C8;
 }
