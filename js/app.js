@@ -7,7 +7,11 @@ window.addEventListener("load", function () {
 
 async function initializeApp() {
   console.log("🚀 Initializing J+D Partner Map...");
-
+  
+  // Show loading overlay initially
+  const loadingOverlay = document.getElementById('loading-overlay');
+  const authOverlay = document.getElementById('auth-overlay');
+  
   // Initialize authentication state
   authState.isLoading = false;
 
@@ -23,6 +27,13 @@ async function initializeApp() {
 
   // Initialize map regardless of auth status (will be hidden if not authenticated)
   initializeMap();
+  
+  // Hide loading overlay after initialization
+  setTimeout(() => {
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('hidden');
+    }
+  }, 1000); // Small delay to show loading state
 }
 
 function setupAuthEventListeners() {

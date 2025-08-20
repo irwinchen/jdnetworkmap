@@ -646,14 +646,14 @@ body {
   font-weight: bold !important;
 }
 
-/* Layer marker styles */
+/* Layer marker styles - Remove problematic hover transform */
 .layer-marker {
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
-.layer-marker:hover {
-  transform: scale(1.2);
-  z-index: 1000;
+/* Use CSS to prevent hover jitter by being more specific with pointer events */
+.leaflet-interactive:hover {
+  opacity: 0.9;
 }
 
 /* Layer popup styles */
@@ -982,6 +982,58 @@ body {
 
 .auth-overlay.hidden {
   display: none;
+}
+
+/* Loading Overlay Styles */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(55, 55, 55, 0.98);
+  backdrop-filter: blur(15px);
+  z-index: 15000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-overlay.hidden {
+  display: none;
+}
+
+.loading-content {
+  text-align: center;
+  color: #e1e1e1;
+}
+
+.loading-content h2 {
+  color: #ff0064;
+  margin: 20px 0 10px 0;
+  font-size: 24px;
+  font-family: "GT Sectra", Georgia, serif;
+}
+
+.loading-content p {
+  color: #e1e1e1;
+  font-size: 16px;
+  margin: 0;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 0, 100, 0.3);
+  border-top: 4px solid #ff0064;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .auth-message {

@@ -40,6 +40,9 @@ class LayerManager {
         });
         
         console.log('🎛️ LayerManager initialized');
+        
+        // Pre-load layer counts for better UX
+        this.preloadLayerCounts();
     }
     
     /**
@@ -539,7 +542,9 @@ class LayerManager {
             weight: 2,
             opacity: 0.8,
             fillOpacity: 0.7,
-            className: `layer-marker ${config.id}`
+            className: `layer-marker ${config.id}`,
+            // Prevent hover jitter by controlling pointer events
+            pane: 'markerPane'
         });
         
         // Add popup with data
@@ -736,7 +741,10 @@ class LayerManager {
                 toggleEye.classList.add('closed');
                 toggleEye.setAttribute('data-lucide', 'eye-off');
                 if (countElement) {
-                    countElement.textContent = '0';
+                    // Show cached count if available, otherwise 0
+                    const config = this.layerConfigs[layerId];
+                    const count = config?.cachedCount || 0;
+                    countElement.textContent = count;
                 }
             }
             
@@ -797,6 +805,39 @@ class LayerManager {
      */
     isLayerActive(layerId) {
         return this.activeLayers.has(layerId);
+    }
+    
+    /**
+     * Pre-load layer counts without activating layers
+     */
+    async preloadLayerCounts() {
+        console.log('📊 Pre-loading layer counts...');
+        
+        const promises = Object.keys(this.layerConfigs).map(async (layerId) => {
+            const config = this.layerConfigs[layerId];
+            
+            // Only preload for CSV data sources
+            if (config.dataSource.type === 'csv') {
+                try {
+                    const response = await fetch(config.dataSource.url);
+                    if (response.ok) {
+                        const csvText = await response.text();
+                        const data = this.parseCsv(csvText);
+                        const filteredData = this.applyFilters(data, config.dataSource.filters);
+                        
+                        // Cache the count
+                        this.layerConfigs[layerId].cachedCount = filteredData.length;
+                        
+                        console.log(`📈 Pre-loaded ${config.name}: ${filteredData.length} items`);
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ Failed to pre-load count for ${config.name}:`, error);
+                }
+            }
+        });
+        
+        await Promise.all(promises);
+        this.updateUI();
     }
     
     /**
