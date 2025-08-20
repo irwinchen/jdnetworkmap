@@ -57,18 +57,19 @@ class LayerManager {
                 markerShape: 'square',
                 zIndex: 100,
                 dataSource: {
-                    type: 'mock',
-                    count: 0,
+                    type: 'csv',
+                    url: '/data/Public_Libraries/public_libraries_complete.csv',
                     fieldMapping: {
-                        id: ['lib_id', 'fscskey', 'id', 'ID'],
-                        name: ['libname', 'library_name', 'name', 'NAME'],
+                        id: ['id', 'lib_id', 'fscskey', 'ID'],
+                        name: ['name', 'libname', 'library_name', 'NAME'],
                         lat: ['latitude', 'LATITUDE', 'lat', 'LAT', 'y'],
                         lng: ['longitude', 'LONGITUDE', 'lng', 'LON', 'LONG', 'x'],
                         address: ['address', 'ADDRESS', 'street', 'location'],
                         city: ['city', 'CITY', 'town', 'TOWN'],
-                        state: ['stabr', 'state', 'STATE', 'st'],
+                        state: ['state', 'stabr', 'STATE', 'st'],
                         zip: ['zip', 'ZIP', 'zipcode', 'postal_code'],
-                        website: ['webaddr', 'website', 'url', 'web_address']
+                        phone: ['phone', 'PHONE', 'telephone', 'contact_phone'],
+                        outlet_type: ['outlet_type', 'type', 'TYPE', 'category']
                     }
                 },
                 clustering: {
@@ -572,9 +573,22 @@ class LayerManager {
         const state = data[mapping.state] || '';
         const zip = data[mapping.zip] || '';
         const website = data[mapping.website] || '';
+        const phone = data[mapping.phone] || '';
+        const outletType = data[mapping.outlet_type] || '';
         
         let html = `<div class="layer-popup ${config.id}">`;
         html += `<h3 style="color: ${config.color}; margin-bottom: 8px;">${name}</h3>`;
+        
+        // Add outlet type for libraries
+        if (outletType && config.id === 'public-libraries') {
+            const typeLabel = {
+                'CE': 'Central Library',
+                'BR': 'Branch Library',
+                'BM': 'Bookmobile',
+                'BB': 'Books-by-Mail'
+            }[outletType] || outletType;
+            html += `<p><strong>Type:</strong> ${typeLabel}</p>`;
+        }
         
         if (address) {
             html += `<p><strong>Address:</strong><br>${address}`;
@@ -582,6 +596,17 @@ class LayerManager {
                 html += `<br>${city}${city && (state || zip) ? ', ' : ''}${state}${state && zip ? ' ' : ''}${zip}`;
             }
             html += '</p>';
+        }
+        
+        if (phone && phone !== ' ' && phone !== '-1' && phone !== '-3' && phone !== '-4') {
+            // Format phone number if it's a 10-digit string
+            const cleanPhone = phone.replace(/\D/g, '');
+            if (cleanPhone.length === 10) {
+                const formatted = `(${cleanPhone.slice(0,3)}) ${cleanPhone.slice(3,6)}-${cleanPhone.slice(6)}`;
+                html += `<p><strong>Phone:</strong> <a href="tel:${cleanPhone}">${formatted}</a></p>`;
+            } else if (phone.length > 0) {
+                html += `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>`;
+            }
         }
         
         if (website && website !== ' ') {
