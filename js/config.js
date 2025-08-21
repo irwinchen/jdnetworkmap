@@ -22,6 +22,32 @@ const AIRTABLE_CONFIG = {
 // Debug redirect URI
 console.log("🔗 Current redirect URI:", OAUTH_CONFIG.redirectUri);
 
+// Immediate OAuth configuration diagnostics on page load
+console.log("🚀 J+D Partner Map - OAuth Configuration Check");
+console.log("=".repeat(50));
+console.log("🔍 Client ID:", OAUTH_CONFIG.clientId);
+console.log("🔍 Client ID length:", OAUTH_CONFIG.clientId.length);
+console.log("🔍 Client ID format:", OAUTH_CONFIG.clientId.match(/^[a-f0-9-]{36}$/) ? "✅ Valid UUID" : "❌ Invalid format");
+console.log("🔍 Redirect URI:", OAUTH_CONFIG.redirectUri);
+console.log("🔍 Redirect URI protocol:", OAUTH_CONFIG.redirectUri.startsWith('https://') ? "✅ HTTPS" : "❌ Not HTTPS");
+console.log("🔍 Current page URL:", window.location.href);
+console.log("🔍 Current hostname:", window.location.hostname);
+console.log("🔍 Expected hostname:", new URL(OAUTH_CONFIG.redirectUri).hostname);
+console.log("🔍 Hostname match:", new URL(OAUTH_CONFIG.redirectUri).hostname === window.location.hostname ? "✅ Match" : "❌ Mismatch");
+console.log("🔍 Scope:", OAUTH_CONFIG.scope);
+console.log("🔍 Airtable URL:", OAUTH_CONFIG.airtableUrl);
+console.log("🔍 Debug mode active:", new URLSearchParams(window.location.search).get('debug') === 'simple' ? "✅ Simple OAuth" : "Standard PKCE");
+
+// Browser detection
+const userAgent = navigator.userAgent;
+const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+const isChrome = /chrome/i.test(userAgent);
+const isBrave = /brave/i.test(userAgent) || navigator.brave;
+console.log("🌐 Browser:", isSafari ? "Safari" : isChrome ? "Chrome" : isBrave ? "Brave" : "Other");
+console.log("🍪 Cookies enabled:", navigator.cookieEnabled ? "✅ Yes" : "❌ No");
+console.log("🔒 HTTPS connection:", location.protocol === 'https:' ? "✅ Yes" : "❌ No");
+console.log("=".repeat(50));
+
 // Authentication state
 const authState = {
   isAuthenticated: false,

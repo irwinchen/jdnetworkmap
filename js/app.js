@@ -17,6 +17,9 @@ async function initializeApp() {
 
   // Setup authentication event listeners
   setupAuthEventListeners();
+  
+  // Show debug panel if in debug mode
+  showDebugPanel();
 
   // Check for existing authentication or OAuth callback
   const isCallback = await handleOAuthCallback();
@@ -476,4 +479,37 @@ function restorePreviousLayerStates() {
   window.layerManager.updateUI();
   
   console.log("✅ Previous layer states restored");
+}
+
+function showDebugPanel() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const debugMode = urlParams.get('debug');
+  
+  if (debugMode === 'simple') {
+    const debugPanel = document.getElementById('debug-panel');
+    const debugContent = document.getElementById('debug-content');
+    
+    if (debugPanel && debugContent) {
+      debugPanel.style.display = 'block';
+      
+      // Create debug information HTML
+      const debugInfo = `
+        <div style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; margin: 10px 0;">
+          <strong>🧪 Debug Mode: Simple OAuth (No PKCE)</strong><br>
+          <strong>Client ID:</strong> ${OAUTH_CONFIG.clientId}<br>
+          <strong>Redirect URI:</strong> ${OAUTH_CONFIG.redirectUri}<br>
+          <strong>Current URL:</strong> ${window.location.href}<br>
+          <strong>Hostname Match:</strong> ${new URL(OAUTH_CONFIG.redirectUri).hostname === window.location.hostname ? '✅ Yes' : '❌ No'}<br>
+          <strong>Browser:</strong> ${navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
+                                     navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other'}<br>
+          <strong>HTTPS:</strong> ${location.protocol === 'https:' ? '✅ Yes' : '❌ No'}<br>
+          <strong>Cookies:</strong> ${navigator.cookieEnabled ? '✅ Enabled' : '❌ Disabled'}
+        </div>
+        <p><strong>Note:</strong> Check browser console for detailed logging when you click Login.</p>
+      `;
+      
+      debugContent.innerHTML = debugInfo;
+      console.log("🧪 Debug panel displayed for simple OAuth mode");
+    }
+  }
 }
