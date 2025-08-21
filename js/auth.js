@@ -128,6 +128,34 @@ async function initiateOAuth() {
       code_challenge_method: "S256"
     });
 
+    // Test both simple and PKCE URLs for debugging
+    console.log("🧪 Testing simple OAuth URL without PKCE...");
+    const simpleAuthUrl = new URL(`${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`);
+    simpleAuthUrl.searchParams.set("client_id", OAUTH_CONFIG.clientId);
+    simpleAuthUrl.searchParams.set("redirect_uri", OAUTH_CONFIG.redirectUri);
+    simpleAuthUrl.searchParams.set("response_type", "code");
+    simpleAuthUrl.searchParams.set("scope", OAUTH_CONFIG.scope);
+    simpleAuthUrl.searchParams.set("state", state);
+    
+    console.log("🧪 Simple URL (no PKCE):", simpleAuthUrl.toString());
+    
+    // For debugging, allow user to test without PKCE by adding ?debug=simple to URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugMode = urlParams.get('debug');
+    
+    if (debugMode === 'simple') {
+      console.log("🧪 DEBUG MODE: Using simple OAuth without PKCE");
+      console.log("🧪 Redirecting to simple URL (no PKCE):", simpleAuthUrl.toString());
+      
+      // Store a simple state for callback verification
+      sessionStorage.setItem("oauth_state", state);
+      sessionStorage.removeItem("oauth_code_verifier"); // Remove PKCE verifier
+      
+      // Redirect to simple OAuth URL
+      window.location.href = simpleAuthUrl.toString();
+      return;
+    }
+
     // Test browser environment and capabilities
     console.log("🔍 Browser environment check:", {
       cookiesEnabled: navigator.cookieEnabled,
@@ -138,7 +166,19 @@ async function initiateOAuth() {
       thirdPartyCookies: document.cookie ? "enabled" : "unknown"
     });
 
-    // Test if we can fetch the authorization endpoint
+    // Comprehensive OAuth configuration diagnostics
+    console.log("🔍 OAuth Configuration Diagnostics:");
+    console.log("🔍 Client ID length:", OAUTH_CONFIG.clientId.length);
+    console.log("🔍 Client ID format:", OAUTH_CONFIG.clientId.match(/^[a-f0-9-]{36}$/) ? "valid UUID" : "invalid format");
+    console.log("🔍 Redirect URI length:", OAUTH_CONFIG.redirectUri.length);
+    console.log("🔍 Redirect URI protocol:", new URL(OAUTH_CONFIG.redirectUri).protocol);
+    console.log("🔍 Redirect URI hostname:", new URL(OAUTH_CONFIG.redirectUri).hostname);
+    console.log("🔍 Current page hostname:", window.location.hostname);
+    console.log("🔍 Hostname match:", new URL(OAUTH_CONFIG.redirectUri).hostname === window.location.hostname);
+    console.log("🔍 Scope parts:", OAUTH_CONFIG.scope.split(' ').length);
+    console.log("🔍 Scope content:", OAUTH_CONFIG.scope.split(' '));
+    
+    // Test the authorization endpoint accessibility
     try {
       const testResponse = await fetch(`${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`, {
         method: 'HEAD',
@@ -147,6 +187,15 @@ async function initiateOAuth() {
       console.log("🔍 Authorization endpoint test:", testResponse.status || "no-cors mode");
     } catch (testError) {
       console.warn("⚠️ Could not test authorization endpoint:", testError.message);
+    }
+    
+    // Check if we're on the correct domain
+    const expectedDomain = new URL(OAUTH_CONFIG.redirectUri).hostname;
+    if (window.location.hostname !== expectedDomain) {
+      console.warn("⚠️ Domain mismatch detected!");
+      console.warn("⚠️ Expected domain:", expectedDomain);
+      console.warn("⚠️ Current domain:", window.location.hostname);
+      console.warn("⚠️ This will cause OAuth to fail with redirect_uri mismatch");
     }
 
     // Redirect to Airtable OAuth
@@ -325,8 +374,15 @@ async function exchangeCodeForTokens(code) {
     client_id: OAUTH_CONFIG.clientId,
     redirect_uri: OAUTH_CONFIG.redirectUri,
     code: code,
-    code_verifier: codeVerifier,
   };
+  
+  // Only add code_verifier if we have one (PKCE mode)
+  if (codeVerifier) {
+    requestBody.code_verifier = codeVerifier;
+    console.log("🔍 Using PKCE mode with code_verifier");
+  } else {
+    console.log("🔍 Using simple OAuth mode without PKCE");
+  }
 
   console.log("🔍 Token request body:", requestBody);
   console.log("🔍 Lambda proxy endpoint:", OAUTH_CONFIG.lambdaProxyUrl);
