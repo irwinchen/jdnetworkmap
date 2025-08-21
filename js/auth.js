@@ -36,6 +36,12 @@ async function generateCodeChallenge(verifier) {
 async function initiateOAuth() {
   console.log("🔐 Starting OAuth flow...");
 
+  // Check for Safari and warn about potential issues
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  if (isSafari) {
+    console.warn("🦁 Safari detected - OAuth may require privacy settings adjustment");
+  }
+
   try {
     // Generate PKCE parameters according to RFC 7636
     const state = generateRandomString(32); // 32 characters is sufficient for state
@@ -109,7 +115,16 @@ async function initiateOAuth() {
     
   } catch (error) {
     console.error("❌ OAuth initialization failed:", error);
-    showAuthError("OAuth setup failed: " + error.message + ". Please try again.");
+    
+    let errorMessage = "OAuth setup failed: " + error.message;
+    if (isSafari) {
+      errorMessage += "\n\n🦁 Safari users: If login fails, try:\n" +
+                     "1. Safari → Preferences → Privacy\n" +
+                     "2. Uncheck 'Prevent cross-site tracking'\n" +
+                     "3. Or try using Chrome/Firefox for OAuth";
+    }
+    
+    showAuthError(errorMessage + "\n\nPlease try again.");
   }
 }
 
