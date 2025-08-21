@@ -1,35 +1,48 @@
 // J+D Partner Network Map - Authentication System
 
-// OAuth2 PKCE Utility Functions
-function generateRandomString(length) {
-  // Generate a secure random string that's URL-safe
-  const array = new Uint8Array(Math.ceil(length * 3 / 4)); // Account for base64 expansion
+// OAuth2 PKCE Utility Functions - RFC 7636 Compliant
+function generateCodeVerifier() {
+  // RFC 7636: code_verifier = high-entropy cryptographic random STRING using [A-Z] / [a-z] / [0-9] / "-" / "." / "_" / "~"
+  const array = new Uint8Array(32); // 256 bits of entropy
   crypto.getRandomValues(array);
+  
+  // Convert to base64url without padding
   const base64 = btoa(String.fromCharCode.apply(null, array))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=/g, "");
   
-  // Return exactly the requested length
-  return base64.substring(0, length);
+  return base64;
 }
 
-async function sha256(plain) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return crypto.subtle.digest("SHA-256", data);
-}
-
-function base64urlencode(str) {
-  return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
+function generateState() {
+  // Generate secure random state parameter
+  const array = new Uint8Array(16); // 128 bits of entropy
+  crypto.getRandomValues(array);
+  
+  return btoa(String.fromCharCode.apply(null, array))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=/g, "");
 }
 
-async function generateCodeChallenge(verifier) {
-  const hashed = await sha256(verifier);
-  return base64urlencode(hashed);
+async function generateCodeChallenge(codeVerifier) {
+  // RFC 7636: code_challenge = BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+  const encoder = new TextEncoder();
+  const data = encoder.encode(codeVerifier);
+  const hashed = await crypto.subtle.digest("SHA-256", data);
+  
+  // Convert ArrayBuffer to base64url
+  const bytes = new Uint8Array(hashed);
+  let binaryString = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binaryString += String.fromCharCode(bytes[i]);
+  }
+  
+  return btoa(binaryString)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
 }
 
 // OAuth2 Authentication Functions
@@ -59,16 +72,16 @@ async function initiateOAuth() {
 
   try {
     // Generate PKCE parameters according to RFC 7636
-    const state = generateRandomString(32); // 32 characters is sufficient for state
-    const codeVerifier = generateRandomString(128); // RFC 7636 recommends 43-128 chars
+    const state = generateState();
+    const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
     // Validate PKCE parameters
-    if (!state || state.length !== 32) {
+    if (!state || state.length < 16) {
       throw new Error("Invalid state parameter generated");
     }
-    if (!codeVerifier || codeVerifier.length !== 128) {
-      throw new Error("Invalid code_verifier generated");
+    if (!codeVerifier || codeVerifier.length < 43) {
+      throw new Error("Invalid code_verifier generated (must be 43+ chars)");
     }
     if (!codeChallenge || codeChallenge.length < 40) {
       throw new Error("Invalid code_challenge generated");
