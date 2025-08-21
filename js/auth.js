@@ -36,10 +36,25 @@ async function generateCodeChallenge(verifier) {
 async function initiateOAuth() {
   console.log("🔐 Starting OAuth flow...");
 
-  // Check for Safari and warn about potential issues
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  // Check for browser-specific issues
+  const userAgent = navigator.userAgent;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+  const isChrome = /chrome/i.test(userAgent);
+  const isFirefox = /firefox/i.test(userAgent);
+  const isBrave = /brave/i.test(userAgent) || navigator.brave;
+  
+  console.log("🌐 Browser detection:", {
+    userAgent: userAgent.substring(0, 50) + "...",
+    isSafari,
+    isChrome,
+    isFirefox,
+    isBrave: !!isBrave
+  });
+  
   if (isSafari) {
     console.warn("🦁 Safari detected - OAuth may require privacy settings adjustment");
+  } else if (isChrome) {
+    console.log("🟢 Chrome detected - checking for privacy extensions or strict settings");
   }
 
   try {
@@ -100,12 +115,23 @@ async function initiateOAuth() {
       code_challenge_method: "S256"
     });
 
-    // Test if we can fetch the authorization endpoint first
+    // Test browser environment and capabilities
+    console.log("🔍 Browser environment check:", {
+      cookiesEnabled: navigator.cookieEnabled,
+      sessionStorageAvailable: typeof(Storage) !== "undefined" && sessionStorage,
+      cryptoAvailable: !!window.crypto,
+      httpsConnection: location.protocol === 'https:',
+      currentDomain: location.hostname,
+      thirdPartyCookies: document.cookie ? "enabled" : "unknown"
+    });
+
+    // Test if we can fetch the authorization endpoint
     try {
       const testResponse = await fetch(`${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`, {
-        method: 'HEAD'
+        method: 'HEAD',
+        mode: 'no-cors' // Avoid CORS issues for this test
       });
-      console.log("🔍 Authorization endpoint test:", testResponse.status);
+      console.log("🔍 Authorization endpoint test:", testResponse.status || "no-cors mode");
     } catch (testError) {
       console.warn("⚠️ Could not test authorization endpoint:", testError.message);
     }
@@ -117,11 +143,27 @@ async function initiateOAuth() {
     console.error("❌ OAuth initialization failed:", error);
     
     let errorMessage = "OAuth setup failed: " + error.message;
+    
+    // Add browser-specific troubleshooting
     if (isSafari) {
-      errorMessage += "\n\n🦁 Safari users: If login fails, try:\n" +
+      errorMessage += "\n\n🦁 Safari Troubleshooting:\n" +
                      "1. Safari → Preferences → Privacy\n" +
                      "2. Uncheck 'Prevent cross-site tracking'\n" +
-                     "3. Or try using Chrome/Firefox for OAuth";
+                     "3. Change cookies to 'Allow from current website only'\n" +
+                     "4. Or try Chrome/Brave/Firefox for OAuth";
+    } else if (isChrome) {
+      errorMessage += "\n\n🟢 Chrome Troubleshooting:\n" +
+                     "1. Check if you have privacy extensions (uBlock, Privacy Badger, etc.)\n" +
+                     "2. Try disabling ad/privacy blockers temporarily\n" +
+                     "3. Check Chrome Settings → Privacy → Cookies (allow third-party)\n" +
+                     "4. Try Incognito/Private mode\n" +
+                     "5. Clear browser cache and cookies for this site";
+    } else {
+      errorMessage += "\n\n🌐 General Troubleshooting:\n" +
+                     "1. Try a different browser (Chrome, Brave, Firefox)\n" +
+                     "2. Disable ad blockers and privacy extensions\n" +
+                     "3. Clear browser cache and cookies\n" +
+                     "4. Try private/incognito mode";
     }
     
     showAuthError(errorMessage + "\n\nPlease try again.");
