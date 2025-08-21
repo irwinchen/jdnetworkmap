@@ -49,9 +49,6 @@ async function generateCodeChallenge(codeVerifier) {
 async function initiateOAuth() {
   console.log("🔐 Starting OAuth flow...");
   console.log("🔐 IMMEDIATE DEBUG: OAuth initiation started");
-  
-  // Force console logging before any potential failures
-  window.alert("DEBUG: OAuth flow starting. Check browser console now for detailed logs.");
 
   // Check for browser-specific issues
   const userAgent = navigator.userAgent;
