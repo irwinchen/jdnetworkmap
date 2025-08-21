@@ -498,6 +498,8 @@ function showDebugPanel() {
           <strong>🧪 Debug Mode: Simple OAuth (No PKCE)</strong><br>
           <strong>Client ID:</strong> ${OAUTH_CONFIG.clientId}<br>
           <strong>Redirect URI:</strong> ${OAUTH_CONFIG.redirectUri}<br>
+          <strong>Target Workspace:</strong> ${OAUTH_CONFIG.targetWorkspaceId || 'Not set'}<br>
+          <strong>Required Base:</strong> ${OAUTH_CONFIG.requiredBaseId}<br>
           <strong>Current URL:</strong> ${window.location.href}<br>
           <strong>Hostname Match:</strong> ${new URL(OAUTH_CONFIG.redirectUri).hostname === window.location.hostname ? '✅ Yes' : '❌ No'}<br>
           <strong>Browser:</strong> ${navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome') ? 'Safari' : 
@@ -505,7 +507,7 @@ function showDebugPanel() {
           <strong>HTTPS:</strong> ${location.protocol === 'https:' ? '✅ Yes' : '❌ No'}<br>
           <strong>Cookies:</strong> ${navigator.cookieEnabled ? '✅ Enabled' : '❌ Disabled'}
         </div>
-        <p><strong>Note:</strong> Check browser console for detailed logging when you click Login.</p>
+        <p><strong>Note:</strong> The workspace parameter should automatically select the J+D Lab Network workspace. Check browser console for detailed logging when you click Login.</p>
       `;
       
       debugContent.innerHTML = debugInfo;

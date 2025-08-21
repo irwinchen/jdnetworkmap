@@ -70,6 +70,10 @@ async function initiateOAuth() {
   
   if (isSafari) {
     console.warn("🦁 Safari detected - OAuth may require privacy settings adjustment");
+    console.warn("🦁 Safari OAuth tips:");
+    console.warn("  - Disable 'Prevent cross-site tracking' in Safari preferences");
+    console.warn("  - Set cookies to 'Allow from current website only' or 'Allow from websites I visit'");
+    console.warn("  - Make sure ITP (Intelligent Tracking Prevention) allows OAuth redirects");
   } else if (isChrome) {
     console.log("🟢 Chrome detected - checking for privacy extensions or strict settings");
   }
@@ -113,6 +117,12 @@ async function initiateOAuth() {
     authUrl.searchParams.set("state", state);
     authUrl.searchParams.set("code_challenge", codeChallenge);
     authUrl.searchParams.set("code_challenge_method", "S256");
+    
+    // Add workspace ID to pre-select the correct workspace
+    if (OAUTH_CONFIG.targetWorkspaceId) {
+      authUrl.searchParams.set("workspace", OAUTH_CONFIG.targetWorkspaceId);
+      console.log("🎯 Pre-selecting workspace:", OAUTH_CONFIG.targetWorkspaceId);
+    }
 
     // Validate final URL length (avoid extremely long URLs)
     const finalUrl = authUrl.toString();
@@ -129,7 +139,8 @@ async function initiateOAuth() {
       scope: OAUTH_CONFIG.scope,
       state: state,
       code_challenge: codeChallenge,
-      code_challenge_method: "S256"
+      code_challenge_method: "S256",
+      workspace: OAUTH_CONFIG.targetWorkspaceId
     });
 
     // Test both simple and PKCE URLs for debugging
@@ -140,6 +151,11 @@ async function initiateOAuth() {
     simpleAuthUrl.searchParams.set("response_type", "code");
     simpleAuthUrl.searchParams.set("scope", OAUTH_CONFIG.scope);
     simpleAuthUrl.searchParams.set("state", state);
+    
+    // Also add workspace to simple URL
+    if (OAUTH_CONFIG.targetWorkspaceId) {
+      simpleAuthUrl.searchParams.set("workspace", OAUTH_CONFIG.targetWorkspaceId);
+    }
     
     console.log("🧪 Simple URL (no PKCE):", simpleAuthUrl.toString());
     
@@ -203,7 +219,17 @@ async function initiateOAuth() {
     }
 
     // Redirect to Airtable OAuth
-    window.location.href = finalUrl;
+    if (isSafari) {
+      // Safari sometimes works better with window.open for OAuth
+      console.log("🦁 Safari: Using window.open for OAuth redirect");
+      const authWindow = window.open(finalUrl, '_self');
+      if (!authWindow) {
+        console.warn("🦁 Safari blocked popup, falling back to location.href");
+        window.location.href = finalUrl;
+      }
+    } else {
+      window.location.href = finalUrl;
+    }
     
   } catch (error) {
     console.error("❌ OAuth initialization failed:", error);
