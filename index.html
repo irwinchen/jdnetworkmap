@@ -134,7 +134,7 @@
         </button>
       </div>
       <div class="layers-content">
-        <!-- J+D Partners Layer (always visible, non-toggleable) -->
+        <!-- J+D Partners Layer (toggleable) -->
         <div class="layer-item layer-base" data-layer="jd-partners">
           <div class="layer-info">
             <div
@@ -147,9 +147,13 @@
             </div>
           </div>
           <div class="layer-controls">
-            <div class="visibility-indicator active" title="Always visible">
-              <i data-lucide="eye" class="eye-icon"></i>
-            </div>
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye" class="toggle-eye open"></i>
+            </button>
           </div>
         </div>
 

@@ -363,12 +363,117 @@ function handleAddPartnerToggle() {
       window.partnerMap.removeLayer(window.currentTempMarker);
       delete window.currentTempMarker;
     }
+    
+    // Restore previous layer visibility states
+    restorePreviousLayerStates();
   } else {
     // Enter add mode
     console.log("Entering add mode...");
     appState.mapMode = "add";
+    
+    // Store current layer states and hide all non-J+D layers
+    hideOtherLayersForAddMode();
   }
 
   // Update UI using centralized function
   updateUIForMode();
+}
+
+// Store layer states before entering add mode and hide non-J+D layers
+function hideOtherLayersForAddMode() {
+  console.log("📦 Hiding other layers for Add Partner mode...");
+  
+  if (!window.layerManager) {
+    console.warn("LayerManager not available");
+    return;
+  }
+  
+  // Store current layer states if not already stored
+  if (!window.previousLayerStates) {
+    window.previousLayerStates = new Map();
+    
+    // Store all current active layers and their visibility
+    window.layerManager.activeLayers.forEach((layerData, layerId) => {
+      window.previousLayerStates.set(layerId, {
+        active: true,
+        visible: layerData.visible
+      });
+    });
+    
+    // Also store inactive layers
+    Object.keys(window.layerManager.layerConfigs).forEach(layerId => {
+      if (!window.layerManager.activeLayers.has(layerId)) {
+        window.previousLayerStates.set(layerId, {
+          active: false,
+          visible: false
+        });
+      }
+    });
+  }
+  
+  // Hide all layers except J+D Partners
+  window.layerManager.activeLayers.forEach((layerData, layerId) => {
+    if (layerId !== 'jd-partners' && layerData.visible) {
+      console.log(`🔹 Hiding layer: ${layerId}`);
+      window.layerManager.deactivateLayer(layerId);
+    }
+  });
+  
+  // Ensure J+D Partners layer is visible
+  if (window.layerManager.activeLayers.has('jd-partners')) {
+    const jdPartners = window.layerManager.activeLayers.get('jd-partners');
+    if (!jdPartners.visible) {
+      console.log("🔹 Showing J+D Partners layer");
+      window.layerManager.activateLayer('jd-partners');
+    }
+  }
+  
+  // Update UI to reflect changes
+  window.layerManager.updateUI();
+  
+  console.log("✅ Layers hidden for Add Partner mode");
+}
+
+// Restore previous layer states when exiting add mode
+function restorePreviousLayerStates() {
+  console.log("📦 Restoring previous layer states...");
+  
+  if (!window.layerManager || !window.previousLayerStates) {
+    console.warn("LayerManager or previousLayerStates not available");
+    return;
+  }
+  
+  // Restore each layer's previous state
+  window.previousLayerStates.forEach((state, layerId) => {
+    const currentlyActive = window.layerManager.activeLayers.has(layerId);
+    const currentlyVisible = currentlyActive ? window.layerManager.activeLayers.get(layerId).visible : false;
+    
+    if (state.active && state.visible && !currentlyVisible) {
+      // Layer should be active and visible but isn't
+      console.log(`🔹 Restoring layer: ${layerId}`);
+      window.layerManager.activateLayer(layerId);
+    } else if (layerId === 'jd-partners') {
+      // Handle J+D Partners visibility state
+      const jdPartners = window.layerManager.activeLayers.get('jd-partners');
+      if (jdPartners && state.visible !== jdPartners.visible) {
+        if (state.visible) {
+          window.layerManager.activateLayer('jd-partners');
+        } else {
+          window.layerManager.deactivateLayer('jd-partners');
+        }
+      }
+    } else if (!state.active && currentlyActive) {
+      // Layer should be inactive but is active
+      console.log(`🔹 Deactivating layer: ${layerId}`);
+      window.layerManager.deactivateLayer(layerId);
+    }
+  });
+  
+  // Clear stored states
+  delete window.previousLayerStates;
+  
+  // Update UI to reflect changes
+  window.layerManager.updateUI();
+  
+  console.log("✅ Previous layer states restored");
 }

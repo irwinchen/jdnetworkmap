@@ -28,11 +28,11 @@ class LayerManager {
             }
         }, 100);
         
-        // Always add J+D partners as the base layer
+        // Initialize J+D partners as active by default but toggleable
         this.activeLayers.set('jd-partners', {
             id: 'jd-partners',
             name: 'J+D Partners',
-            type: 'base',
+            type: 'partners', // Changed from 'base' to allow toggling
             visible: true,
             count: 0,
             zIndex: 200,
@@ -227,15 +227,28 @@ class LayerManager {
         const layerItem = document.querySelector(`[data-layer="${layerId}"]`);
         const toggle = layerItem.querySelector('.layer-toggle');
         
-        if (this.activeLayers.has(layerId)) {
-            // Layer is active, deactivate it
-            this.deactivateLayer(layerId);
-        } else {
-            // Layer is not active, try to activate it
-            if (this.canActivateLayer()) {
-                await this.activateLayer(layerId);
+        // Special handling for J+D Partners layer
+        if (layerId === 'jd-partners') {
+            const jdLayerData = this.activeLayers.get('jd-partners');
+            if (jdLayerData && jdLayerData.visible) {
+                // Layer is visible, hide it
+                this.deactivateLayer(layerId);
             } else {
-                this.showLayerLimitMessage();
+                // Layer is hidden, show it
+                await this.activateLayer(layerId);
+            }
+        } else {
+            // Handle other layers normally
+            if (this.activeLayers.has(layerId)) {
+                // Layer is active, deactivate it
+                this.deactivateLayer(layerId);
+            } else {
+                // Layer is not active, try to activate it
+                if (this.canActivateLayer()) {
+                    await this.activateLayer(layerId);
+                } else {
+                    this.showLayerLimitMessage();
+                }
             }
         }
         
@@ -254,6 +267,19 @@ class LayerManager {
      * Activate a layer
      */
     async activateLayer(layerId) {
+        // Handle J+D Partners layer specially - just show the existing cluster group
+        if (layerId === 'jd-partners') {
+            if (window.partnerMarkers && !this.map.hasLayer(window.partnerMarkers)) {
+                this.map.addLayer(window.partnerMarkers);
+            }
+            // Mark as visible in activeLayers
+            if (this.activeLayers.has('jd-partners')) {
+                this.activeLayers.get('jd-partners').visible = true;
+            }
+            console.log(`👁️ J+D Partners layer shown`);
+            return;
+        }
+        
         const config = this.layerConfigs[layerId];
         if (!config) {
             console.error('Layer config not found:', layerId);
@@ -324,9 +350,14 @@ class LayerManager {
         const layerData = this.activeLayers.get(layerId);
         console.log('🎛️ Deactivating layer:', layerId);
         
-        // Don't allow deactivating the base J+D layer
-        if (layerData.type === 'base') {
-            console.log('⚠️ Cannot deactivate base J+D Partners layer');
+        // Handle J+D Partners layer specially - hide the cluster group but keep it in activeLayers
+        if (layerId === 'jd-partners') {
+            if (window.partnerMarkers && this.map.hasLayer(window.partnerMarkers)) {
+                this.map.removeLayer(window.partnerMarkers);
+            }
+            // Keep in activeLayers but mark as not visible
+            this.activeLayers.get('jd-partners').visible = false;
+            console.log(`👁️ J+D Partners layer hidden`);
             return;
         }
         
@@ -742,9 +773,39 @@ class LayerManager {
      * Update UI to reflect current layer states
      */
     updateUI() {
-        // Update layer items
+        // Handle J+D Partners layer separately
+        const jdLayerItem = document.querySelector('[data-layer="jd-partners"]');
+        if (jdLayerItem) {
+            const jdToggle = jdLayerItem.querySelector('.layer-toggle');
+            const jdToggleEye = jdToggle.querySelector('.toggle-eye');
+            const jdCountElement = document.getElementById('jd-partners-count');
+            
+            if (this.activeLayers.has('jd-partners')) {
+                const jdLayerData = this.activeLayers.get('jd-partners');
+                if (jdLayerData.visible) {
+                    jdLayerItem.classList.add('active');
+                    jdToggle.classList.add('active');
+                    jdToggleEye.classList.remove('closed');
+                    jdToggleEye.classList.add('open');
+                    jdToggleEye.setAttribute('data-lucide', 'eye');
+                } else {
+                    jdLayerItem.classList.remove('active');
+                    jdToggle.classList.remove('active');
+                    jdToggleEye.classList.remove('open');
+                    jdToggleEye.classList.add('closed');
+                    jdToggleEye.setAttribute('data-lucide', 'eye-off');
+                }
+                if (jdCountElement) {
+                    jdCountElement.textContent = jdLayerData.count;
+                }
+            }
+        }
+        
+        // Update other layer items
         Object.keys(this.layerConfigs).forEach(layerId => {
             const layerItem = document.querySelector(`[data-layer="${layerId}"]`);
+            if (!layerItem) return;
+            
             const toggle = layerItem.querySelector('.layer-toggle');
             const toggleEye = toggle.querySelector('.toggle-eye');
             const countElement = document.getElementById(`${layerId}-count`);
@@ -781,13 +842,25 @@ class LayerManager {
             }
         });
         
-        // Update active layer count (J+D Partners + additional layers, max 2 total)
-        // J+D Partners is always active, so we count additional layers + 1
-        const additionalLayersActive = this.activeLayers.size - 1; // Subtract J+D base layer
-        const displayCount = 1 + additionalLayersActive; // J+D Partners + additional
+        // Update active layer count - count visible layers
+        let visibleLayersCount = 0;
+        
+        // Count J+D Partners if visible
+        const jdPartners = this.activeLayers.get('jd-partners');
+        if (jdPartners && jdPartners.visible) {
+            visibleLayersCount++;
+        }
+        
+        // Count other active layers
+        this.activeLayers.forEach((layerData, layerId) => {
+            if (layerId !== 'jd-partners' && layerData.visible) {
+                visibleLayersCount++;
+            }
+        });
+        
         const countElement = document.getElementById('active-layer-count');
         if (countElement) {
-            countElement.textContent = displayCount;
+            countElement.textContent = visibleLayersCount;
         }
         
         // Update J+D partners count
