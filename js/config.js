@@ -3,9 +3,9 @@
 // OAuth2 Configuration for Airtable
 const OAUTH_CONFIG = {
   clientId: "acff4d2d-a468-4f15-a3ee-d9cfea00512e",
-  redirectUri: "https://master.d3u92f9fdv7kxv.amplifyapp.com/",
+  redirectUri: "https://master.d3u92f9fdv7kxv.amplifyapp.com", // Removed trailing slash
   scope: "data.records:read data.records:write user.email:read",
-  airtableUrl: "https://www.airtable.com",
+  airtableUrl: "https://airtable.com", // Changed from www.airtable.com
   targetWorkspaceId: "wsp521eG1mYR4mexh",
   requiredBaseId: "appwdh7OXsghNRy6k", // J+D Lab Network base ID
   lambdaProxyUrl: "https://89ylgt7orf.execute-api.us-east-1.amazonaws.com/prod/oauth",

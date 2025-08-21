@@ -2,12 +2,16 @@
 
 // OAuth2 PKCE Utility Functions
 function generateRandomString(length) {
-  const array = new Uint8Array(length);
+  // Generate a secure random string that's URL-safe
+  const array = new Uint8Array(Math.ceil(length * 3 / 4)); // Account for base64 expansion
   crypto.getRandomValues(array);
-  return btoa(String.fromCharCode.apply(null, array))
+  const base64 = btoa(String.fromCharCode.apply(null, array))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=/g, "");
+  
+  // Return exactly the requested length
+  return base64.substring(0, length);
 }
 
 async function sha256(plain) {
@@ -32,36 +36,81 @@ async function generateCodeChallenge(verifier) {
 async function initiateOAuth() {
   console.log("🔐 Starting OAuth flow...");
 
-  // Generate PKCE parameters
-  const state = generateRandomString(32);
-  const codeVerifier = generateRandomString(96); // 96 bytes -> ~128 chars in base64
-  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  try {
+    // Generate PKCE parameters according to RFC 7636
+    const state = generateRandomString(32); // 32 characters is sufficient for state
+    const codeVerifier = generateRandomString(128); // RFC 7636 recommends 43-128 chars
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-  // Store PKCE parameters in sessionStorage
-  sessionStorage.setItem("oauth_state", state);
-  sessionStorage.setItem("oauth_code_verifier", codeVerifier);
-  
-  // Debug PKCE parameters
-  console.log("🔍 Generated code_verifier length:", codeVerifier.length);
-  console.log("🔍 Generated state length:", state.length);
+    // Validate PKCE parameters
+    if (!state || state.length !== 32) {
+      throw new Error("Invalid state parameter generated");
+    }
+    if (!codeVerifier || codeVerifier.length !== 128) {
+      throw new Error("Invalid code_verifier generated");
+    }
+    if (!codeChallenge || codeChallenge.length < 40) {
+      throw new Error("Invalid code_challenge generated");
+    }
 
-  // Build authorization URL
-  const authUrl = new URL(
-    `${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`
-  );
-  authUrl.searchParams.append("client_id", OAUTH_CONFIG.clientId);
-  authUrl.searchParams.append("redirect_uri", OAUTH_CONFIG.redirectUri);
-  authUrl.searchParams.append("response_type", "code");
-  authUrl.searchParams.append("scope", OAUTH_CONFIG.scope);
-  authUrl.searchParams.append("state", state);
-  authUrl.searchParams.append("code_challenge", codeChallenge);
-  authUrl.searchParams.append("code_challenge_method", "S256");
+    // Store PKCE parameters in sessionStorage
+    sessionStorage.setItem("oauth_state", state);
+    sessionStorage.setItem("oauth_code_verifier", codeVerifier);
+    
+    // Debug PKCE parameters
+    console.log("🔍 Generated code_verifier length:", codeVerifier.length);
+    console.log("🔍 Generated code_challenge length:", codeChallenge.length);
+    console.log("🔍 Generated state length:", state.length);
+    console.log("🔍 Client ID:", OAUTH_CONFIG.clientId);
+    console.log("🔍 Redirect URI:", OAUTH_CONFIG.redirectUri);
 
-  console.log("🔗 Redirecting to:", authUrl.toString());
-  console.log("📋 Requested scopes:", OAUTH_CONFIG.scope);
+    // Build authorization URL with proper encoding
+    const authUrl = new URL(`${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`);
+    
+    // Add parameters with explicit encoding
+    authUrl.searchParams.set("client_id", OAUTH_CONFIG.clientId);
+    authUrl.searchParams.set("redirect_uri", OAUTH_CONFIG.redirectUri);
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("scope", OAUTH_CONFIG.scope);
+    authUrl.searchParams.set("state", state);
+    authUrl.searchParams.set("code_challenge", codeChallenge);
+    authUrl.searchParams.set("code_challenge_method", "S256");
 
-  // Redirect to Airtable OAuth
-  window.location.href = authUrl.toString();
+    // Validate final URL length (avoid extremely long URLs)
+    const finalUrl = authUrl.toString();
+    if (finalUrl.length > 2048) {
+      throw new Error("Authorization URL too long");
+    }
+
+    console.log("🔗 Redirecting to:", finalUrl);
+    console.log("📋 Requested scopes:", OAUTH_CONFIG.scope);
+    console.log("🔍 Full OAuth parameters:", {
+      client_id: OAUTH_CONFIG.clientId,
+      redirect_uri: OAUTH_CONFIG.redirectUri,
+      response_type: "code",
+      scope: OAUTH_CONFIG.scope,
+      state: state,
+      code_challenge: codeChallenge,
+      code_challenge_method: "S256"
+    });
+
+    // Test if we can fetch the authorization endpoint first
+    try {
+      const testResponse = await fetch(`${OAUTH_CONFIG.airtableUrl}/oauth2/v1/authorize`, {
+        method: 'HEAD'
+      });
+      console.log("🔍 Authorization endpoint test:", testResponse.status);
+    } catch (testError) {
+      console.warn("⚠️ Could not test authorization endpoint:", testError.message);
+    }
+
+    // Redirect to Airtable OAuth
+    window.location.href = finalUrl;
+    
+  } catch (error) {
+    console.error("❌ OAuth initialization failed:", error);
+    showAuthError("OAuth setup failed: " + error.message + ". Please try again.");
+  }
 }
 
 async function handleOAuthCallback() {
@@ -73,7 +122,38 @@ async function handleOAuthCallback() {
   // Check for OAuth errors
   if (error) {
     console.error("❌ OAuth error:", error);
-    showAuthError("Authentication failed: " + error);
+    
+    let errorMessage;
+    switch (error) {
+      case 'access_denied':
+        errorMessage = "Access was denied. Please try again and make sure to:\n\n" +
+                      "1. Click 'Allow' to grant access\n" +
+                      "2. Select the 'J+D Lab Network' base when prompted\n" +
+                      "3. If you've reached the authorization limit, revoke old authorizations in your Airtable Account → Integrations";
+        break;
+      case 'invalid_request':
+        errorMessage = "Invalid request. Please contact support if this persists.";
+        break;
+      case 'unauthorized_client':
+        errorMessage = "Application not authorized. Please contact support.";
+        break;
+      case 'unsupported_response_type':
+        errorMessage = "Unsupported response type. Please contact support.";
+        break;
+      case 'invalid_scope':
+        errorMessage = "Invalid permissions requested. Please contact support.";
+        break;
+      case 'server_error':
+        errorMessage = "Airtable server error. Please try again in a moment.";
+        break;
+      case 'temporarily_unavailable':
+        errorMessage = "Airtable is temporarily unavailable. Please try again in a moment.";
+        break;
+      default:
+        errorMessage = "Authentication failed: " + error + "\n\nPlease try again.";
+    }
+    
+    showAuthError(errorMessage);
     return false;
   }
 
