@@ -15,6 +15,8 @@ const NJ_PARTNERS_DATA = [
         name: "NJ Council for the Humanities",
         type: "Connector",
         address: "28 W State St, Trenton, NJ 08608",
+        latitude: 40.2206,
+        longitude: -74.7563,
         description: "Statewide program partner that explores, cultivates, and champions the public humanities in order to strengthen New Jersey's diverse community. Partners with the National Endowment for the Humanities.",
         contact: "",
         email: "",
@@ -28,6 +30,8 @@ const NJ_PARTNERS_DATA = [
         name: "New Jersey Civic Information Consortium",
         type: "Funder",
         address: "", // Address not specified in source document
+        latitude: 40.7589, // Newark, NJ (approximate)
+        longitude: -74.0134,
         description: "NJCIC - Funder and connector organization supporting civic information initiatives in New Jersey.",
         contact: "",
         email: "",
@@ -41,6 +45,8 @@ const NJ_PARTNERS_DATA = [
         name: "Atlantic Cape Community College",
         type: "Community College",
         address: "5100 Black Horse Pike, Mays Landing, NJ 08330",
+        latitude: 39.4529,
+        longitude: -74.7268,
         description: "Community college partner in the J+D cohort providing noncredit certificate programs for community journalism and civic engagement.",
         contact: "",
         email: "",
@@ -54,6 +60,8 @@ const NJ_PARTNERS_DATA = [
         name: "Mercer County Community College",
         type: "Community College", 
         address: "1200 Old Trenton Road, West Windsor, NJ 08550",
+        latitude: 40.2737,
+        longitude: -74.6468,
         description: "Community college partner in the J+D cohort providing noncredit certificate programs for community journalism and civic engagement.",
         contact: "",
         email: "admiss@mccc.edu",
@@ -67,6 +75,8 @@ const NJ_PARTNERS_DATA = [
         name: "Middlesex College",
         type: "Community College",
         address: "2600 Woodbridge Avenue, Edison, NJ 08818",
+        latitude: 40.4590,
+        longitude: -74.4107,
         description: "Community college partner in the J+D cohort providing noncredit certificate programs for community journalism and civic engagement.",
         contact: "",
         email: "",
@@ -80,6 +90,8 @@ const NJ_PARTNERS_DATA = [
         name: "Sussex County Community College",
         type: "Community College",
         address: "One College Hill Road, Newton, NJ 07860",
+        latitude: 41.0581,
+        longitude: -74.7526,
         description: "Community college partner in the J+D cohort providing noncredit certificate programs for community journalism and civic engagement.",
         contact: "",
         email: "",
@@ -93,6 +105,8 @@ const NJ_PARTNERS_DATA = [
         name: "F. M. Kirby Foundation",
         type: "Funder",
         address: "17 DeHart Street, Morristown, NJ 07963",
+        latitude: 40.7968,
+        longitude: -74.4815,
         description: "Family foundation that invests in opportunities that foster self-reliance or otherwise create strong, healthy communities.",
         contact: "",
         email: "info@fmkirbyfoundation.org",
@@ -106,6 +120,8 @@ const NJ_PARTNERS_DATA = [
         name: "coLAB Arts",
         type: "Connector",
         address: "9 Bayard Street, New Brunswick, NJ 08901",
+        latitude: 40.4862,
+        longitude: -74.4518,
         description: "Arts organization that engages artists, social advocates, and communities to create transformative new work through artistic expression and civic engagement.",
         contact: "",
         email: "",
@@ -195,32 +211,38 @@ async function importNJPartners() {
         console.log(`\n📍 Processing ${i + 1}/${NJ_PARTNERS_DATA.length}: ${partnerData.name}`);
 
         try {
-            // Skip partners without addresses (will need manual coordinate entry)
-            if (!partnerData.address || partnerData.address.trim() === '') {
-                console.log(`⚠️  Skipping ${partnerData.name} - no address provided`);
+            // Check if coordinates are provided directly
+            let coordinates = null;
+            if (partnerData.latitude && partnerData.longitude) {
+                coordinates = {
+                    lat: partnerData.latitude,
+                    lng: partnerData.longitude
+                };
+                console.log(`✅ Using pre-calculated coordinates: ${coordinates.lat}, ${coordinates.lng}`);
+            } else if (partnerData.address && partnerData.address.trim() !== '') {
+                // Try geocoding as fallback
+                console.log(`🌍 Geocoding address: ${partnerData.address}`);
+                coordinates = await geocodeAddress(partnerData.address);
+                
+                if (!coordinates) {
+                    console.log(`⚠️  Skipping ${partnerData.name} - geocoding failed`);
+                    results.skipped++;
+                    results.errors.push({
+                        partner: partnerData.name,
+                        error: "Geocoding failed - unable to determine coordinates"
+                    });
+                    continue;
+                }
+                console.log(`✅ Geocoded to: ${coordinates.lat}, ${coordinates.lng}`);
+            } else {
+                console.log(`⚠️  Skipping ${partnerData.name} - no address or coordinates provided`);
                 results.skipped++;
                 results.errors.push({
                     partner: partnerData.name,
-                    error: "No address provided - coordinates required for database entry"
+                    error: "No address or coordinates provided - location data required for database entry"
                 });
                 continue;
             }
-
-            // Geocode the address to get coordinates
-            console.log(`🌍 Geocoding address: ${partnerData.address}`);
-            const coordinates = await geocodeAddress(partnerData.address);
-
-            if (!coordinates) {
-                console.log(`⚠️  Skipping ${partnerData.name} - geocoding failed`);
-                results.skipped++;
-                results.errors.push({
-                    partner: partnerData.name,
-                    error: "Geocoding failed - unable to determine coordinates"
-                });
-                continue;
-            }
-
-            console.log(`✅ Geocoded to: ${coordinates.lat}, ${coordinates.lng}`);
 
             // Prepare partner data for Airtable
             const airtablePartnerData = {
