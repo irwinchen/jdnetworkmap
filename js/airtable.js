@@ -222,14 +222,14 @@ async function savePartnerToAirtable(partnerData) {
         "Partner Type": partnerData.type,
         "Address": partnerData.address || "",
         "Description": partnerData.description || "",
-        "Contact": partnerData.contact || "",
+        // "Contact" field skipped - it's a linked record field that should be populated manually in Airtable
         "Contact Email": partnerData.email || "",
         "Contact Phone": partnerData.phone || "",
         "Project Tracking Link": partnerData.projectLink || "",
         "Notes": partnerData.notes || "",
         "Latitude": parseFloat(partnerData.latitude),
         "Longitude": parseFloat(partnerData.longitude),
-        
+
         // New user tracking fields (Phase 4)
         "Created By User ID": authState.userId,
         "Created By Email": authState.userEmail,
