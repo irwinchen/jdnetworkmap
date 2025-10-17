@@ -11,51 +11,8 @@
  * Each partner includes name, type, address, and additional metadata
  */
 const OHIO_PARTNERS_DATA = [
-    {
-        name: "Cuyahoga Community College",
-        type: "Community College",
-        address: "700 Carnegie Ave, Cleveland, OH 44115",
-        latitude: 41.5007,
-        longitude: -81.6873,
-        description: "Tri-C is Ohio's first and largest community college, providing access to quality, affordable education and programs. Partner in J+D Community Listening Fellowship and certificate programs.",
-        contact: "",
-        email: "info@tri-c.edu",
-        phone: "(216) 987-6000",
-        website: "https://www.tri-c.edu",
-        projectLink: "",
-        notes: "Active J+D partner in Cleveland. Involved in Community Listening Fellowship (second cohort) and My Cleveland Agenda project. Provides venue support, prints flyers, and hosts events for fellows. Part of certificate program collaboration. Primary contact for cohort: Tri-C provides physical infrastructure and community connections.",
-        sourceDocument: "J+D_StrategicConversations.md - CLEVELAND/OHIO section"
-    },
-    {
-        name: "Signal Cleveland",
-        type: "News Organization",
-        address: "1422 Euclid Ave, Suite 627, Cleveland, OH 44115",
-        latitude: 41.5027,
-        longitude: -81.6789,
-        description: "Independent nonprofit news organization providing data-driven local journalism for Northeast Ohio. Key to J+D's Ohio strategy.",
-        contact: "",
-        email: "info@signalcleveland.org",
-        phone: "",
-        website: "https://signalcleveland.org",
-        projectLink: "",
-        notes: "Critical partner in J+D Ohio strategy. Provides editorial support and context for Community Listening Fellowship. Handles final edits of the My Cleveland Agenda. Strategic Conversations document notes: 'Signal is probably going to be the key to Ohio strategy.' J+D seeking to create more resilient network beyond Signal dependence.",
-        sourceDocument: "J+D_StrategicConversations.md - CLEVELAND/OHIO section"
-    },
-    {
-        name: "Neighborhood Media Foundation",
-        type: "Connector",
-        address: "Cleveland, OH",
-        latitude: 41.4993,
-        longitude: -81.6944,
-        description: "Community media organization supporting neighborhood journalism and local publishers in Cleveland. Acts as community media coordinator for J+D programs.",
-        contact: "Rich",
-        email: "",
-        phone: "",
-        website: "",
-        projectLink: "",
-        notes: "Community Media Coordinator role ($5,000 funding). Secured four community publishers to publish pieces as part of My Cleveland Agenda project. Supports community media outlets collaboration/content creation ($2,000 allocated to support community media, $500 per pattern for 4 outlets). Strategic Conversations mentions potential role for Rich in thinking about community media. Fellowship cost breakdown includes Rich at NMF as community media coordinator.",
-        sourceDocument: "J+D_StrategicConversations.md - CLEVELAND/OHIO section"
-    },
+    // NOTE: Cuyahoga Community College, Signal Cleveland, and Neighborhood Media Foundation
+    // were already added manually and are excluded from this import to avoid duplicates
     {
         name: "Sinclair Community College",
         type: "Community College",
