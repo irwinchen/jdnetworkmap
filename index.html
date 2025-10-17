@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>J+D Partner Map</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <!-- Leaflet MarkerCluster CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+    />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Main Application Styles -->
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-container">
+        <div class="title-section">
+          <svg
+            class="logo"
+            viewBox="0 0 72 72"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect fill="#fd0764" x="-.06" width="72" height="72" />
+            <g fill="#fff">
+              <path
+                d="M13.82,57.61c0,.2.13.33.33.33h8.82c.37,0,.67.3.67.67v.8c0,.37-.3.67-.67.67h-10.62c-.37,0-.67-.3-.67-.67v-21.98c0-.37.3-.67.67-.67h.8c.37,0,.67.3.67.67v20.18Z"
+              />
+              <path
+                d="M29.47,59.58c-.07.3-.33.5-.63.5h-.83c-.53,0-.73-.37-.67-.67l6.36-22.15c.07-.3.33-.5.63-.5h1.66c.3,0,.57.2.63.5l6.36,22.15c.07.3-.13.67-.67.67h-.83c-.3,0-.57-.2-.63-.5l-1.63-5.63c-.1-.3-.33-.47-.63-.47h-6.86c-.3,0-.53.17-.63.47l-1.63,5.63ZM31.96,51.05c-.07.27.07.37.27.37h5.86c.2,0,.33-.1.27-.37l-3.03-11.32c-.03-.13-.07-.2-.13-.2h-.07c-.07,0-.1.07-.13.2l-3.03,11.32Z"
+              />
+              <path
+                d="M58.17,48.19c1.37,1.1,2.36,3.2,2.36,5.1,0,3.86-3.16,6.79-6.99,6.79h-5.83c-.37,0-.67-.3-.67-.67v-21.98c0-.37.3-.67.67-.67h5.83c3.6,0,6.53,2.6,6.53,6.19,0,1.53-.63,3.4-1.9,4.5-.27.23-.27.53,0,.73ZM49.45,38.9c-.2,0-.33.13-.33.33v7.29c0,.2.13.33.33.33h4.6c2.2,0,3.93-1.76,3.93-3.96s-1.73-4-3.93-4h-4.6ZM53.91,57.95c2.53,0,4.56-2.03,4.56-4.56s-2.03-4.56-4.56-4.56h-4.46c-.2,0-.33.13-.33.33v8.46c0,.2.13.33.33.33h4.46Z"
+              />
+              <path
+                d="M13.98,23.04c0,.84.67,1.51,1.7,1.51s1.67-.65,1.67-1.7v-8.55c0-.21.17-.37.37-.37h1.88c.21,0,.37.17.37.37h0v8.74c0,2.27-1.7,4.14-4.31,4.14-2.46,0-4.32-1.86-4.32-4.14v-.52c0-.21.17-.37.37-.37h1.89c.21,0,.37.17.37.37v.52Z"
+              />
+              <path
+                d="M50.68,27.07c-.21,0-.37-.17-.37-.37v-12.3c0-.21.17-.37.37-.37h4.31c2.29,0,3.89,1.88,4.16,4.12.19,1.6.19,3.21,0,4.81-.26,2.24-1.86,4.12-4.16,4.12h-4.31ZM54.98,24.46c.86,0,1.44-.69,1.53-1.51.19-1.6.19-3.21,0-4.81-.09-.82-.67-1.51-1.53-1.51h-1.88c-.1,0-.18.07-.19.16,0,0,0,.01,0,.02v7.46c0,.1.07.18.16.19,0,0,.01,0,.02,0h1.88Z"
+              />
+            </g>
+          </svg>
+          <div class="title">J+D Partner Network Map</div>
+        </div>
+
+        <!-- Add Partner Button moved back to header -->
+        <button
+          id="add-partner-btn"
+          class="add-partner-btn"
+          title="Toggle Add Partner Mode"
+        >
+          Add Partner
+        </button>
+      </div>
+      <div class="controls">
+        <!-- User info (shown when authenticated) -->
+        <div id="user-info" class="user-info" style="display: none">
+          <span id="user-email">user@example.com</span>
+          <button id="logout-btn" class="btn-logout">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Authentication Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+      <div class="auth-message">
+        <h2>Login with Airtable</h2>
+        <p>
+          Please login with your J+D Airtable account to access the J+D Partner
+          Network Map.
+        </p>
+        <p>
+          <strong
+            >On the Airtable access screen, select the "J+D Lab Network"
+            base.</strong
+          >
+        </p>
+        <div id="debug-panel" class="debug-panel" style="display: none;">
+          <h3>🔍 OAuth Debug Information</h3>
+          <div id="debug-content"></div>
+        </div>
+        <img src="help_airtable_login.png" />
+        <button id="airtable-login-btn" class="btn-auth">Login</button>
+        <div id="auth-error" class="auth-error"></div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h2>Loading J+D Partner Map</h2>
+        <p>Initializing authentication and loading data...</p>
+      </div>
+    </div>
+
+    <!-- Mode Indicator -->
+    <div id="mode-indicator" class="mode-indicator">
+      <span>Click on the map to add a partner</span>
+    </div>
+
+    <!-- Temporary Zoom Level Indicator -->
+    <div id="zoom-indicator" class="zoom-indicator">
+      <span>Zoom: <span id="zoom-level">4</span></span>
+    </div>
+
+    <!-- Layers Panel -->
+    <div id="layers-panel" class="layers-panel">
+      <div class="layers-header">
+        <h3>Layers</h3>
+        <button
+          id="layers-toggle"
+          class="layers-toggle"
+          title="Toggle Layers Panel"
+        >
+          <i data-lucide="chevron-down" class="toggle-icon"></i>
+        </button>
+      </div>
+      <div class="layers-content">
+        <!-- J+D Partners Layer (toggleable) -->
+        <div class="layer-item layer-base" data-layer="jd-partners">
+          <div class="layer-info">
+            <div
+              class="layer-color-indicator"
+              style="background-color: #ff0064"
+            ></div>
+            <div class="layer-details">
+              <span class="layer-name">J+D Partners</span>
+              <span class="layer-count" id="jd-partners-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye" class="toggle-eye open"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Available Additional Layers -->
+        <div class="layer-item" data-layer="public-libraries">
+          <div class="layer-info">
+            <div
+              class="layer-color-indicator"
+              style="background-color: #8b5cf6"
+            ></div>
+            <div class="layer-details">
+              <span class="layer-name">Public Libraries</span>
+              <span class="layer-count" id="public-libraries-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="community-colleges">
+          <div class="layer-info">
+            <div
+              class="layer-color-indicator"
+              style="background-color: #f59e0b"
+            ></div>
+            <div class="layer-details">
+              <span class="layer-name">Community Colleges</span>
+              <span class="layer-count" id="community-colleges-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="civic-organizations">
+          <div class="layer-info">
+            <div
+              class="layer-color-indicator"
+              style="background-color: #10b981"
+            ></div>
+            <div class="layer-details">
+              <span class="layer-name">Civic Organizations</span>
+              <span class="layer-count" id="civic-organizations-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="layer-item" data-layer="news-organizations">
+          <div class="layer-info">
+            <div
+              class="layer-color-indicator"
+              style="background-color: #ef4444"
+            ></div>
+            <div class="layer-details">
+              <span class="layer-name">News Organizations</span>
+              <span class="layer-count" id="news-organizations-count">0</span>
+            </div>
+          </div>
+          <div class="layer-controls">
+            <button
+              class="layer-toggle"
+              data-action="toggle"
+              title="Toggle layer visibility"
+            >
+              <i data-lucide="eye-off" class="toggle-eye closed"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Layer Limit Indicator -->
+        <div class="layer-limit-info">
+          <span id="active-layer-count">1</span> of 2 layers active
+        </div>
+      </div>
+    </div>
+
+    <!-- Partner Form Modal -->
+    <div id="partner-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Add New Partner</h2>
+          <button class="modal-close">&times;</button>
+        </div>
+        <form id="partner-form" class="partner-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="partner-name">Organization Name *</label>
+              <input
+                type="text"
+                id="partner-name"
+                name="partner-name"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="partner-type">Partner Type *</label>
+              <select id="partner-type" name="partner-type" required>
+                <option value="">Select Type...</option>
+                <option value="Connector">Connector</option>
+                <option value="Information Hub">Information Hub</option>
+                <option value="Funder">Funder</option>
+                <option value="News Organization">News Organization</option>
+                <option value="Community College">Community College</option>
+                <option value="Library">Library</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="partner-address">Address</label>
+              <input
+                type="text"
+                id="partner-address"
+                name="partner-address"
+                placeholder="Street address, City, State, ZIP"
+              />
+              <button type="button" id="geocode-address" class="geocode-btn">
+                Geocode Address
+              </button>
+              <div class="geocoding-status"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="partner-latitude">Latitude *</label>
+              <input
+                type="number"
+                id="partner-latitude"
+                name="partner-latitude"
+                step="any"
+                readonly
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="partner-longitude">Longitude *</label>
+              <input
+                type="number"
+                id="partner-longitude"
+                name="partner-longitude"
+                step="any"
+                readonly
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="partner-description">Description</label>
+              <textarea
+                id="partner-description"
+                name="partner-description"
+                rows="3"
+                placeholder="Brief description of the organization..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="partner-contact">Contact Person</label>
+              <input
+                type="text"
+                id="partner-contact"
+                name="partner-contact"
+                placeholder="Contact name"
+              />
+            </div>
+            <div class="form-group">
+              <label for="partner-email">Contact Email</label>
+              <input
+                type="email"
+                id="partner-email"
+                name="partner-email"
+                placeholder="contact@organization.org"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="partner-phone">Contact Phone</label>
+              <input
+                type="tel"
+                id="partner-phone"
+                name="partner-phone"
+                placeholder="(555) 123-4567"
+              />
+            </div>
+            <div class="form-group">
+              <label for="partner-project-link">Project Tracking Link</label>
+              <input
+                type="url"
+                id="partner-project-link"
+                name="partner-project-link"
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="partner-notes">Notes</label>
+              <textarea
+                id="partner-notes"
+                name="partner-notes"
+                rows="2"
+                placeholder="Additional notes..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div id="save-progress" class="save-progress hidden">Saving...</div>
+
+          <div class="form-actions">
+            <button type="submit" id="save-partner-btn" class="save-btn">
+              Save Partner
+            </button>
+            <button type="button" id="cancel-partner" class="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <!-- Leaflet MarkerCluster Plugin -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+    <!-- Partner Management System -->
+    <script src="js/partners.js"></script>
+
+    <!-- Layer Management System -->
+    <script src="js/layerManager.js"></script>
+
+    <!-- Core Application JavaScript -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/airtable.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Partner Import Modules -->
+    <script src="js/nj-partners-import.js"></script>
+    <script src="js/nm-partners-import.js"></script>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      // Initialize Lucide icons after DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof lucide !== "undefined") {
+          lucide.createIcons();
+        }
+      });
+    </script>
+  </body>
+</html>
